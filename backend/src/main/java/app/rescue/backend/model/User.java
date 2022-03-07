@@ -1,5 +1,9 @@
 package app.rescue.backend.model;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.*;
 import java.sql.Blob;
 import java.util.*;
@@ -7,11 +11,11 @@ import java.util.*;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @Table(name = "user")
-public class User {
+public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private UUID id;
+    private Long id;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -33,14 +37,25 @@ public class User {
     private String description;
 
     @Column(name = "community_standing", nullable = false)
-    private Long communityStanding;
+    private Long communityStanding = Long.valueOf(1);
 
+    @Enumerated(EnumType.STRING)
+    private Role userRole;
+
+    @Column(name = "locked")
+    private Boolean locked = false;
+
+    @Column(name = "enabled")
+    private Boolean enabled = false;
+
+
+    /*
     @ManyToMany
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id"))
     private Set<Role> roles = new LinkedHashSet<>();
-
+    */
     /*
     idea gia edw
     o xristis pataei ena koumpi "invite a friend",
@@ -54,6 +69,17 @@ public class User {
     @Column(name = "invited_by")
     private String invitedBy;
 
+    public User() {
+
+    }
+
+    public User(String email, String password, String name, Role userRole) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.userRole = userRole;
+    }
+
     public String getInvitedBy() {
         return invitedBy;
     }
@@ -62,13 +88,19 @@ public class User {
         this.invitedBy = invitedBy;
     }
 
+    /*
     public Set<Role> getRoles() {
         return roles;
+    }
+
+    public void setRole(Role role) {
+        roles.add(role);
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+    */
 
     public Long getCommunityStanding() {
         return communityStanding;
@@ -110,8 +142,40 @@ public class User {
         this.name = name;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority =
+                new SimpleGrantedAuthority(userRole.name());
+        return Collections.singletonList(authority);
+    }
+
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !locked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public void setPassword(String password) {
@@ -126,11 +190,11 @@ public class User {
         this.email = email;
     }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }

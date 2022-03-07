@@ -2,7 +2,6 @@ package app.rescue.backend.model;
 
 import javax.persistence.*;
 import java.sql.Date;
-import java.util.UUID;
 
 @Entity
 @Table(name = "individual")

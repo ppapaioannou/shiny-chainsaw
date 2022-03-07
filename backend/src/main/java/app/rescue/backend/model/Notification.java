@@ -1,16 +1,15 @@
 package app.rescue.backend.model;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notification")
 public class Notification {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private UUID id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -27,24 +26,24 @@ public class Notification {
     private String notificationType;
 
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "read_at")
-    private Timestamp readAt;
+    private LocalDateTime readAt;
 
-    public Timestamp getReadAt() {
+    public LocalDateTime getReadAt() {
         return readAt;
     }
 
-    public void setReadAt(Timestamp readAt) {
+    public void setReadAt(LocalDateTime readAt) {
         this.readAt = readAt;
     }
 
-    public Timestamp getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp created_at) {
+    public void setCreatedAt(LocalDateTime created_at) {
         this.createdAt = created_at;
     }
 
@@ -80,11 +79,11 @@ public class Notification {
         this.user = user;
     }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }
