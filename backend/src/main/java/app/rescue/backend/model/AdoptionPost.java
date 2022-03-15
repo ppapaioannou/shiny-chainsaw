@@ -11,10 +11,10 @@ public class AdoptionPost extends AnimalPost {
     private String age;
 
     @Column(name = "neutered")
-    private String neutered;
+    private Boolean neutered;
 
     @Column(name = "microchip_number")
-    private String microchipNumber;
+    private String adoptionMicrochipNumber;
 
     @Column(name = "good_with_children")
     private Boolean goodWithChildren;
@@ -38,19 +38,19 @@ public class AdoptionPost extends AnimalPost {
         this.goodWithChildren = goodWithChildren;
     }
 
-    public String getMicrochipNumber() {
-        return microchipNumber;
+    public String getAdoptionMicrochipNumber() {
+        return adoptionMicrochipNumber;
     }
 
-    public void setMicrochipNumber(String microchipNumber) {
-        this.microchipNumber = microchipNumber;
+    public void setAdoptionMicrochipNumber(String microchipNumber) {
+        this.adoptionMicrochipNumber = microchipNumber;
     }
 
-    public String getNeutered() {
+    public Boolean getNeutered() {
         return neutered;
     }
 
-    public void setNeutered(String neutered) {
+    public void setNeutered(Boolean neutered) {
         this.neutered = neutered;
     }
 

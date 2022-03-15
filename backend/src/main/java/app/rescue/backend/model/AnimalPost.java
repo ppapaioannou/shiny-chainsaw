@@ -12,7 +12,7 @@ public class AnimalPost extends Post {
     private String animalType;
 
     @Column(name = "location")
-    private Geometry location;
+    private Geometry animalLocation;
 
     @Column(name = "breed")
     private String breed;
@@ -58,12 +58,12 @@ public class AnimalPost extends Post {
         this.breed = breed;
     }
 
-    public Geometry getLocation() {
-        return location;
+    public Geometry getAnimalLocation() {
+        return animalLocation;
     }
 
-    public void setLocation(Geometry location) {
-        this.location = location;
+    public void setAnimalLocation(Geometry location) {
+        this.animalLocation = location;
     }
 
     public String getAnimalType() {

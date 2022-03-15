@@ -1,10 +1,9 @@
 package app.rescue.backend.model;
 
 import javax.persistence.*;
-import java.sql.Blob;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
@@ -22,11 +21,6 @@ public class Post {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Lob
-    @Column(name = "image")
-    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "owner_id"))
-    private Set<Blob> images = new LinkedHashSet<>();
-
     @Column(name = "body")
     private String body;
 
@@ -41,6 +35,17 @@ public class Post {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Transient
+    private List<Image> images;
+
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
@@ -80,14 +85,6 @@ public class Post {
 
     public void setBody(String body) {
         this.body = body;
-    }
-
-    public Set<Blob> getImages() {
-        return images;
-    }
-
-    public void setImages(Set<Blob> images) {
-        this.images = images;
     }
 
     public String getTitle() {

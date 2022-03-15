@@ -9,24 +9,24 @@ import java.sql.Date;
 @Table()
 public class MissingPost extends AnimalPost {
     @Column(name = "date")
-    private Date date;
+    private Date missingDate;
 
     @Column(name = "microchip_number")
-    private String microchipNumber;
+    private String missingMicrochipNumber;
 
-    public String getMicrochipNumber() {
-        return microchipNumber;
+    public String getMissingMicrochipNumber() {
+        return missingMicrochipNumber;
     }
 
-    public void setMicrochipNumber(String microchipNumber) {
-        this.microchipNumber = microchipNumber;
+    public void setMissingMicrochipNumber(String microchipNumber) {
+        this.missingMicrochipNumber = microchipNumber;
     }
 
-    public Date getDate() {
-        return date;
+    public Date getMissingDate() {
+        return missingDate;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setMissingDate(Date date) {
+        this.missingDate = date;
     }
 }

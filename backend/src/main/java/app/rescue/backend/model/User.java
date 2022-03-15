@@ -5,7 +5,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.sql.Blob;
 import java.util.*;
 
 @Entity
@@ -26,9 +25,8 @@ public class User implements UserDetails {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Lob
-    @Column(name = "profile_photo")
-    private Blob profilePhoto;
+    @Transient
+    private Image profileImage;
 
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -48,14 +46,6 @@ public class User implements UserDetails {
     @Column(name = "enabled")
     private Boolean enabled = false;
 
-
-    /*
-    @ManyToMany
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "roles_id"))
-    private Set<Role> roles = new LinkedHashSet<>();
-    */
     /*
     idea gia edw
     o xristis pataei ena koumpi "invite a friend",
@@ -69,14 +59,11 @@ public class User implements UserDetails {
     @Column(name = "invited_by")
     private String invitedBy;
 
-    public User() {
-
+    public Role getUserRole() {
+        return userRole;
     }
 
-    public User(String email, String password, String name, Role userRole) {
-        this.email = email;
-        this.password = password;
-        this.name = name;
+    public void setUserRole(Role userRole) {
         this.userRole = userRole;
     }
 
@@ -87,20 +74,6 @@ public class User implements UserDetails {
     public void setInvitedBy(String invitedBy) {
         this.invitedBy = invitedBy;
     }
-
-    /*
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRole(Role role) {
-        roles.add(role);
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-    */
 
     public Long getCommunityStanding() {
         return communityStanding;
@@ -126,12 +99,22 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
     }
 
-    public Blob getProfilePhoto() {
-        return profilePhoto;
+    public Image getProfileImage() {
+        return profileImage;
     }
 
-    public void setProfilePhoto(Blob profilePhoto) {
-        this.profilePhoto = profilePhoto;
+    public void setProfileImage(Image profileImage) {
+        if (profileImage.getData() != null) {
+            this.profileImage = profileImage;
+        }
+        else {
+            //TODO add default profile photo if nothing was provided
+            this.profileImage = defaultProfileImage();
+        }
+    }
+
+    private Image defaultProfileImage() {
+        return new Image("profileImage", null);
     }
 
     public String getName() {

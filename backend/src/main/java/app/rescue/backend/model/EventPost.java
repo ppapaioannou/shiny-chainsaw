@@ -12,57 +12,57 @@ import java.sql.Time;
 @Table()
 public class EventPost extends Post {
     @Column(name = "address")
-    private String address;
+    private String eventAddress;
 
     @Column(name = "location")
-    private Geometry location;
+    private Geometry eventLocation;
 
     @Column(name = "date")
-    private Date date;
+    private Date eventDate;
 
     @Column(name = "time")
-    private Time time;
+    private Time eventTime;
 
     @Column(name = "enable_discussion", nullable = false)
-    private Boolean enableDiscussion = true;
+    private Boolean enableEventDiscussion = true;
 
-    public Boolean getEnableDiscussion() {
-        return enableDiscussion;
+    public Boolean getEnableEventDiscussion() {
+        return enableEventDiscussion;
     }
 
-    public void setEnableDiscussion(Boolean enableDiscussion) {
-        this.enableDiscussion = enableDiscussion;
+    public void setEnableEventDiscussion(Boolean enableDiscussion) {
+        this.enableEventDiscussion = enableDiscussion;
     }
 
-    public Time getTime() {
-        return time;
+    public Time getEventTime() {
+        return eventTime;
     }
 
-    public void setTime(Time time) {
-        this.time = time;
+    public void setEventTime(Time time) {
+        this.eventTime = time;
     }
 
-    public Date getDate() {
-        return date;
+    public Date getEventDate() {
+        return eventDate;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setEventDate(Date date) {
+        this.eventDate = date;
     }
 
-    public Geometry getLocation() {
-        return location;
+    public Geometry getEventLocation() {
+        return eventLocation;
     }
 
-    public void setLocation(Geometry location) {
-        this.location = location;
+    public void setEventLocation(Geometry location) {
+        this.eventLocation = location;
     }
 
-    public String getAddress() {
-        return address;
+    public String getEventAddress() {
+        return eventAddress;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setEventAddress(String address) {
+        this.eventAddress = address;
     }
 }

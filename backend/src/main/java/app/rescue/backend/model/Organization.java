@@ -22,36 +22,36 @@ public class Organization extends User {
     private String zipCode;
 
     @Column(name = "website_url")
-    private String website_url;
+    private String websiteUrl;
 
     @Column(name = "facebook_page_url")
-    private String facebook_page_url;
+    private String facebookPageUrl;
 
     @Column(name = "organization_needs")
-    private String organization_needs;
+    private String organizationNeeds;
 
-    public String getOrganization_needs() {
-        return organization_needs;
+    public String getOrganizationNeeds() {
+        return organizationNeeds;
     }
 
-    public void setOrganization_needs(String organization_needs) {
-        this.organization_needs = organization_needs;
+    public void setOrganizationNeeds(String organization_needs) {
+        this.organizationNeeds = organization_needs;
     }
 
-    public String getFacebook_page_url() {
-        return facebook_page_url;
+    public String getFacebookPageUrl() {
+        return facebookPageUrl;
     }
 
-    public void setFacebook_page_url(String facebook_page_url) {
-        this.facebook_page_url = facebook_page_url;
+    public void setFacebookPageUrl(String facebook_page_url) {
+        this.facebookPageUrl = facebook_page_url;
     }
 
-    public String getWebsite_url() {
-        return website_url;
+    public String getWebsiteUrl() {
+        return websiteUrl;
     }
 
-    public void setWebsite_url(String website_url) {
-        this.website_url = website_url;
+    public void setWebsiteUrl(String website_url) {
+        this.websiteUrl = website_url;
     }
 
     public String getZipCode() {

@@ -9,7 +9,7 @@ import java.sql.Date;
 @Table()
 public class StrayPost extends AnimalPost {
     @Column(name = "date")
-    private Date date;
+    private Date strayDate;
 
     @Column(name = "actions_taken")
     private String actionsTaken;
@@ -22,11 +22,11 @@ public class StrayPost extends AnimalPost {
         this.actionsTaken = actionsTaken;
     }
 
-    public Date getDate() {
-        return date;
+    public Date getStrayDate() {
+        return strayDate;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setStrayDate(Date date) {
+        this.strayDate = date;
     }
 }

@@ -1,6 +1,6 @@
 package app.rescue.backend.controller;
 
-import app.rescue.backend.dto.RegistrationRequest;
+import app.rescue.backend.dto.RegistrationDto;
 import app.rescue.backend.service.RegistrationService;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,12 +15,12 @@ public class RegistrationController {
     }
 
     @PostMapping(path = "individual")
-    public String registerIndividual(@RequestBody RegistrationRequest request) {
+    public String registerIndividual(@RequestBody RegistrationDto request) {
         return registrationService.register(request, "INDIVIDUAL");
     }
 
     @PostMapping(path = "organization")
-    public String registerOrganization(@RequestBody RegistrationRequest request) {
+    public String registerOrganization(@RequestBody RegistrationDto request) {
         return registrationService.register(request, "ORGANIZATION");
     }
 

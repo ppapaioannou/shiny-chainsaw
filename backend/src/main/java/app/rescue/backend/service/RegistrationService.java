@@ -1,9 +1,7 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.dto.RegistrationRequest;
-import app.rescue.backend.model.Role;
-import app.rescue.backend.model.ConfirmationToken;
-import app.rescue.backend.model.User;
+import app.rescue.backend.dto.RegistrationDto;
+import app.rescue.backend.model.*;
 import app.rescue.backend.util.EmailSender;
 import app.rescue.backend.util.EmailValidator;
 import org.springframework.stereotype.Service;
@@ -20,31 +18,60 @@ public class RegistrationService {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
-    public RegistrationService(UserService userService, EmailValidator emailValidator, ConfirmationTokenService confirmationTokenService, EmailSender emailSender) {
+    public RegistrationService(UserService userService, EmailValidator emailValidator,
+                               ConfirmationTokenService confirmationTokenService, EmailSender emailSender) {
         this.userService = userService;
         this.emailValidator = emailValidator;
         this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
     }
 
-    public String register(RegistrationRequest request, String userRole) {
-        boolean isValidEmail = emailValidator.test(request.getEmail());
+    public String register(RegistrationDto requestDto, String userRole) {
+        boolean isValidEmail = emailValidator.test(requestDto.getEmail());
 
         if (!isValidEmail) {
             throw new IllegalStateException("email not valid");
         }
+        User newUser = mapFromDtoToUser(requestDto, userRole);
 
-        String token = userService.signUpUser(
-                new User(request.getEmail(), request.getPassword(), request.getName(), Role.valueOf(userRole)));
+        String token = userService.signUpUser(newUser);
 
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
-        emailSender.send(
-                request.getEmail(),
-                buildEmail(request.getName(), link));
+        emailSender.send(requestDto.getEmail(),buildEmail(requestDto.getName(), link));
 
         return token;
     }
 
+    private User mapFromDtoToUser(RegistrationDto requestDto, String userRole) {
+        User user;
+        if (userRole.equals("INDIVIDUAL")) {
+            user = new Individual();
+            ((Individual) user).setLastName(requestDto.getLastName());
+        }
+        else if (userRole.equals("ORGANIZATION")) {
+            user = new Organization();
+            ((Organization) user).setContactEmail(requestDto.getContactEmail());
+            ((Organization) user).setRegion(requestDto.getRegion());
+            ((Organization) user).setAddress(requestDto.getAddress());
+            ((Organization) user).setCity(requestDto.getCity());
+            ((Organization) user).setZipCode(requestDto.getZipCode());
+            ((Organization) user).setWebsiteUrl(requestDto.getWebsiteUrl());
+            ((Organization) user).setFacebookPageUrl(requestDto.getFacebookPageUrl());
+            ((Organization) user).setOrganizationNeeds(requestDto.getOrganizationNeeds());
+        }
+        else {
+            throw new IllegalStateException("unknown role");
+        }
+        user.setEmail(requestDto.getEmail());
+        user.setPassword(requestDto.getPassword());
+        user.setName(requestDto.getName());
+        user.setProfileImage(new Image("profileImage", requestDto.getProfileImageData()));
+        user.setPhoneNumber(requestDto.getPhoneNumber());
+        user.setDescription(requestDto.getDescription());
+        user.setUserRole(Role.valueOf(userRole));
+
+        return user;
+    }
 
     @Transactional
     public String confirmToken(String token) {
