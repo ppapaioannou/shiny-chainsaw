@@ -3,8 +3,8 @@ package app.rescue.backend.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "message")
-public class Message {
+@Table(name = "participants")
+public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -18,19 +18,13 @@ public class Message {
     @JoinColumn(name = "conversation_id")
     private Conversation conversation;
 
-    @Column(name = "content")
-    private String content;
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String messageText) {
-        this.content = messageText;
-    }
-
     public Conversation getConversation() {
         return conversation;
+    }
+
+    public Participant(User user, Conversation conversation) {
+        this.user = user;
+        this.conversation = conversation;
     }
 
     public void setConversation(Conversation conversation) {

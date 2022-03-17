@@ -1,4 +1,4 @@
-package app.rescue.backend.security;
+package app.rescue.backend.config;
 
 import app.rescue.backend.service.UserService;
 import org.springframework.context.annotation.Bean;

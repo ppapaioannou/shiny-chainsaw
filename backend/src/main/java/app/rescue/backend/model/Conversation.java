@@ -10,16 +10,19 @@ public class Conversation {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "conversation_name")
+    private String conversationName;
 
-    public User getUser() {
-        return user;
+    public Conversation(String conversationName) {
+        this.conversationName = conversationName;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public String getConversationName() {
+        return conversationName;
+    }
+
+    public void setConversationName(String conversationName) {
+        this.conversationName = conversationName;
     }
 
     public Long getId() {
