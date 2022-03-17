@@ -11,16 +11,18 @@ public class PostDto {
     private final List<Byte[]> imagesData;
     private final String body;
     private final String postStatus;
+    private final Boolean enableComments;
 
     //event fields
     private final String eventAddress;
     private final String eventLocation; //Geometry
     private final String eventDate;
     private final String eventTime;
-    private final Boolean enableEventDiscussion;
+    //private final Boolean enableEventDiscussion;
 
     //simple fields
-    private final Boolean enableDiscussion;
+    //private final Boolean enableDiscussion;
+
     //animal fields
     private final String animalType;
     private final String animalLocation;

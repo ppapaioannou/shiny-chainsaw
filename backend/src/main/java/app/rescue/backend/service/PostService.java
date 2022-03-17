@@ -88,6 +88,7 @@ public class PostService {
         post.setBody(postDto.getBody());
         post.setPostType(postType);
         post.setPostStatus(postDto.getPostStatus());
+        post.setEnableComments(postDto.getEnableComments());
         post.setCreatedAt(LocalDateTime.now());
         post.setUser(userRepository.findUserByEmail(userService.getCurrentUser()));
         return post;
@@ -163,7 +164,7 @@ public class PostService {
 
     private Post mapFromDtoToSimplePost(PostDto postDto) {
         SimplePost post = new SimplePost();
-        post.setEnableDiscussion(postDto.getEnableDiscussion());
+        //post.setEnableDiscussion(postDto.getEnableDiscussion());
         return post;
     }
 
@@ -173,7 +174,7 @@ public class PostService {
         //post.setEventLocation(postDto.getEventLocation());
         post.setEventDate(Date.valueOf(postDto.getEventDate()));
         post.setEventTime(Time.valueOf(postDto.getEventTime()));
-        post.setEnableEventDiscussion(postDto.getEnableEventDiscussion());
+        //post.setEnableEventDiscussion(postDto.getEnableEventDiscussion());
         return post;
     }
 

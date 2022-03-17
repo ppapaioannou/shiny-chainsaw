@@ -39,6 +39,17 @@ public class Post {
     @Transient
     private List<Image> images;
 
+    @Column(name = "enable_comments", nullable = false)
+    private Boolean enableComments = true;
+
+    public Boolean getEnableComments() {
+        return enableComments;
+    }
+
+    public void setEnableComments(Boolean enableComments) {
+        this.enableComments = enableComments;
+    }
+
     public List<Image> getImages() {
         return images;
     }

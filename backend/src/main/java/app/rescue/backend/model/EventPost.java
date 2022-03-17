@@ -23,17 +23,6 @@ public class EventPost extends Post {
     @Column(name = "time")
     private Time eventTime;
 
-    @Column(name = "enable_discussion", nullable = false)
-    private Boolean enableEventDiscussion = true;
-
-    public Boolean getEnableEventDiscussion() {
-        return enableEventDiscussion;
-    }
-
-    public void setEnableEventDiscussion(Boolean enableDiscussion) {
-        this.enableEventDiscussion = enableDiscussion;
-    }
-
     public Time getEventTime() {
         return eventTime;
     }

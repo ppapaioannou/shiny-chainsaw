@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.adoption_post</OriginalElement>
+  <nodes>
+    <node x="375.98883928571433" y="677.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.simple_post</node>
+    <node x="146.625" y="392.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.connection</node>
+    <node x="787.5133928571429" y="644.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.image</node>
+    <node x="1247.013392857143" y="392.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.individual</node>
+    <node x="186.98883928571433" y="622.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.animal_post</node>
+    <node x="1056.013392857143" y="370.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.confirmation_token</node>
+    <node x="586.625" y="348.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.post</node>
+    <node x="369.62500000000006" y="359.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.notification</node>
+    <node x="602.5133928571429" y="633.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.event_post</node>
+    <node x="493.00000000000006" y="861.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.adoption_post</node>
+    <node x="0.0" y="894.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.stray_post</node>
+    <node x="199.0" y="894.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.missing_post</node>
+    <node x="958.65625" y="883.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.event_attendees</node>
+    <node x="973.5133928571429" y="655.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.comment</node>
+    <node x="1424.013392857143" y="337.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.organization</node>
+    <node x="497.50000000000006" y="0.0">7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.comment" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.post" relationship="REFERENCES">
+      <point x="-31.0" y="-60.5" />
+      <point x="1004.5133928571429" y="600.0" />
+      <point x="844.6383928571429" y="600.0" />
+      <point x="844.6383928571429" y="590.0" />
+      <point x="710.375" y="590.0" />
+      <point x="41.25" y="104.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.adoption_post" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.animal_post" relationship="REFERENCES">
+      <point x="0.0" y="-82.5" />
+      <point x="596.0" y="835.0" />
+      <point x="271.48883928571433" y="835.0" />
+      <point x="0.0" y="93.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.individual" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="0.0" y="-60.5" />
+      <point x="1325.513392857143" y="316.0" />
+      <point x="1486.90625" y="316.0" />
+      <point x="1486.90625" y="296.0" />
+      <point x="660.25" y="296.0" />
+      <point x="69.75" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.post" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="0.0" y="-104.5" />
+      <point x="669.125" y="316.0" />
+      <point x="958.75" y="316.0" />
+      <point x="958.75" y="306.0" />
+      <point x="613.75" y="306.0" />
+      <point x="23.25" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.confirmation_token" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="0.0" y="-82.5" />
+      <point x="1141.013392857143" y="316.0" />
+      <point x="958.75" y="316.0" />
+      <point x="958.75" y="306.0" />
+      <point x="613.75" y="306.0" />
+      <point x="23.25" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.image" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="41.5" y="-71.5" />
+      <point x="912.0133928571429" y="590.0" />
+      <point x="963.2633928571429" y="590.0" />
+      <point x="963.2633928571429" y="316.0" />
+      <point x="958.75" y="316.0" />
+      <point x="958.75" y="306.0" />
+      <point x="613.75" y="306.0" />
+      <point x="23.25" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.event_attendees" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.event_post" relationship="REFERENCES">
+      <point x="-36.0" y="-60.5" />
+      <point x="994.65625" y="835.0" />
+      <point x="685.0133928571429" y="835.0" />
+      <point x="0.0" y="82.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.animal_post" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.post" relationship="REFERENCES">
+      <point x="0.0" y="-93.5" />
+      <point x="271.48883928571433" y="600.0" />
+      <point x="489.00000000000006" y="600.0" />
+      <point x="489.00000000000006" y="590.0" />
+      <point x="627.875" y="590.0" />
+      <point x="-41.25" y="104.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.notification" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="49.24999999999994" y="-93.5" />
+      <point x="517.375" y="316.0" />
+      <point x="958.75" y="316.0" />
+      <point x="958.75" y="306.0" />
+      <point x="613.75" y="306.0" />
+      <point x="23.25" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.comment" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="31.0" y="-60.5" />
+      <point x="1066.513392857143" y="600.0" />
+      <point x="1045.513392857143" y="600.0" />
+      <point x="1045.513392857143" y="316.0" />
+      <point x="958.75" y="316.0" />
+      <point x="958.75" y="306.0" />
+      <point x="613.75" y="306.0" />
+      <point x="23.25" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.organization" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="0.0" y="-115.5" />
+      <point x="1529.513392857143" y="316.0" />
+      <point x="1486.90625" y="316.0" />
+      <point x="1486.90625" y="296.0" />
+      <point x="660.25" y="296.0" />
+      <point x="69.75" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.event_attendees" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="36.0" y="-60.5" />
+      <point x="1066.65625" y="835.0" />
+      <point x="1236.513392857143" y="835.0" />
+      <point x="1236.513392857143" y="316.0" />
+      <point x="958.75" y="316.0" />
+      <point x="958.75" y="306.0" />
+      <point x="613.75" y="306.0" />
+      <point x="23.25" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.image" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.post" relationship="REFERENCES">
+      <point x="-41.5" y="-71.5" />
+      <point x="829.0133928571429" y="600.0" />
+      <point x="844.6383928571429" y="600.0" />
+      <point x="844.6383928571429" y="590.0" />
+      <point x="710.375" y="590.0" />
+      <point x="41.25" y="104.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.stray_post" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.animal_post" relationship="REFERENCES">
+      <point x="0.0" y="-49.5" />
+      <point x="89.5" y="835.0" />
+      <point x="271.48883928571433" y="835.0" />
+      <point x="0.0" y="93.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.missing_post" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.animal_post" relationship="REFERENCES">
+      <point x="0.0" y="-49.5" />
+      <point x="302.0" y="835.0" />
+      <point x="271.48883928571433" y="835.0" />
+      <point x="0.0" y="93.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.connection" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.user" relationship="REFERENCES">
+      <point x="-50.75" y="-60.5" />
+      <point x="197.375" y="296.0" />
+      <point x="520.75" y="296.0" />
+      <point x="-69.75" y="137.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.event_post" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.post" relationship="REFERENCES">
+      <point x="0.0" y="-82.5" />
+      <point x="685.0133928571429" y="600.0" />
+      <point x="489.00000000000006" y="600.0" />
+      <point x="489.00000000000006" y="590.0" />
+      <point x="627.875" y="590.0" />
+      <point x="-41.25" y="104.5" />
+    </edge>
+    <edge source="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.simple_post" target="7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.post" relationship="REFERENCES">
+      <point x="0.0" y="-38.5" />
+      <point x="458.48883928571433" y="600.0" />
+      <point x="489.00000000000006" y="600.0" />
+      <point x="489.00000000000006" y="590.0" />
+      <point x="627.875" y="590.0" />
+      <point x="-41.25" y="104.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="0.2887189292543021" showDependencies="false" x="818.0" y="513.0" />
+  <SelectedNodes>
+    <node>7d1be7fe-e15a-4010-9164-9080fd0a7f3c.TABLE:rescue_db.adoption_post</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Columns</Category>
+    <Category>Comments</Category>
+    <Category>Key columns</Category>
+    <Category>Virtual foreign keys</Category>
+  </Categories>
+</Diagram>
+
