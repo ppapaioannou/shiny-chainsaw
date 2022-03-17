@@ -16,7 +16,7 @@ public class Connection {
 
     @ManyToOne
     @JoinColumn(name = "connected_to_id")
-    private User connected_to;
+    private User connectedTo;
 
     @Column(name = "connection_status")
     private String connectionStatus;
@@ -29,12 +29,12 @@ public class Connection {
         this.connectionStatus = connectionStatus;
     }
 
-    public User getConnected_to() {
-        return connected_to;
+    public User getConnectedTo() {
+        return connectedTo;
     }
 
-    public void setConnected_to(User connected_to) {
-        this.connected_to = connected_to;
+    public void setConnectedTo(User connected_to) {
+        this.connectedTo = connected_to;
     }
 
     public User getUser() {
