@@ -26,7 +26,7 @@ public class RegistrationService {
         this.emailSender = emailSender;
     }
 
-    public String register(RegistrationDto requestDto, String userRole) {
+    public String register(RegistrationDto requestDto, String userRole, String referralToken) {
         boolean isValidEmail = emailValidator.test(requestDto.getEmail());
 
         if (!isValidEmail) {
@@ -34,13 +34,31 @@ public class RegistrationService {
         }
         User newUser = mapFromDtoToUser(requestDto, userRole);
 
-        String token = userService.signUpUser(newUser);
+        String token = userService.signUpUser(newUser, referralToken);
 
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
         emailSender.send(requestDto.getEmail(),buildEmail(requestDto.getName(), link));
 
         return token;
     }
+
+    /*
+    public String registerInvited(RegistrationDto requestDto, String referralToken, String userRole) {
+        boolean isValidEmail = emailValidator.test(requestDto.getEmail());
+
+        if (!isValidEmail) {
+            throw new IllegalStateException("email not valid");
+        }
+        User newUser = mapFromDtoToUser(requestDto, userRole);
+
+        String token = userService.signUpUser(newUser, referralToken);
+
+        String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
+        emailSender.send(requestDto.getEmail(),buildEmail(requestDto.getName(), link));
+
+        return token;
+    }
+    */
 
     private User mapFromDtoToUser(RegistrationDto requestDto, String userRole) {
         User user;

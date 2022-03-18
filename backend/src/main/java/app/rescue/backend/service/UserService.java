@@ -1,8 +1,7 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.model.ConfirmationToken;
-import app.rescue.backend.model.Image;
-import app.rescue.backend.model.User;
+import app.rescue.backend.model.*;
+import app.rescue.backend.repository.ConnectionRepository;
 import app.rescue.backend.repository.ImageRepository;
 import app.rescue.backend.repository.UserRepository;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -26,12 +25,17 @@ public class UserService implements UserDetailsService {
     private final ImageRepository imageRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    //private final ConnectionService connectionService;
+    private final ConnectionRepository connectionRepository;
 
-    public UserService(UserRepository userRepository, ImageRepository imageRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ConfirmationTokenService confirmationTokenService) {
+    public UserService(UserRepository userRepository, ImageRepository imageRepository,
+                       BCryptPasswordEncoder bCryptPasswordEncoder,
+                       ConfirmationTokenService confirmationTokenService, ConnectionRepository connectionRepository) {
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.confirmationTokenService = confirmationTokenService;
+        this.connectionRepository = connectionRepository;
     }
 
     @Override
@@ -41,7 +45,7 @@ public class UserService implements UserDetailsService {
                 new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
     }
 
-    public String signUpUser(User user) {
+    public String signUpUser(User user, String referralToken) {
         boolean userExists = userRepository.findByEmail(user.getEmail()).isPresent();
 
         if (userExists) {
@@ -52,7 +56,24 @@ public class UserService implements UserDetailsService {
 
         user.setPassword(encodedPassword);
 
-        userRepository.save(user);
+        if (referralToken != null) {
+            User invitedByUser = userRepository.findByReferralToken(referralToken);
+            user.setInvitedBy(invitedByUser);
+            userRepository.save(user);
+
+            //connectionService.connect(user, invitedByUser);
+            if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.INDIVIDUAL) {
+                connectionRepository.save(new Connection(user, invitedByUser, "CONNECTED"));
+                connectionRepository.save(new Connection(invitedByUser, user, "CONNECTED"));
+            }
+            //TODO this needs fixin'
+
+        }
+        else {
+            userRepository.save(user);
+        }
+
+
 
         //TODO create ImageService class to handle all image operations
         Image profileImage = user.getProfileImage();

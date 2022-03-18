@@ -21,6 +21,16 @@ public class Connection {
     @Column(name = "connection_status")
     private String connectionStatus;
 
+    public Connection(){
+
+    }
+
+    public Connection(User user, User connectedTo, String connectionStatus) {
+        this.user = user;
+        this.connectedTo = connectedTo;
+        this.connectionStatus = connectionStatus;
+    }
+
     public String getConnectionStatus() {
         return connectionStatus;
     }

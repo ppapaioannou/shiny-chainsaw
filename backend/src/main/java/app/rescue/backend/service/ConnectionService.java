@@ -63,4 +63,12 @@ public class ConnectionService {
 
         connectionRepository.connect(connectedToUser, loggedInUser);
     }
+
+    public void connect(User userOne, User userTwo) {
+        Connection connectionOne = new Connection(userOne, userTwo, "CONNECTED");
+        connectionRepository.save(connectionOne);
+
+        Connection connectionTwo = new Connection(userTwo, userOne, "CONNECTED");
+        connectionRepository.save(connectionTwo);
+    }
 }

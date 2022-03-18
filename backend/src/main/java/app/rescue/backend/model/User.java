@@ -56,8 +56,20 @@ public class User implements UserDetails {
     e.g. k = myStr.lastIndexOf('/'); string.substring(k, string.length() - 1));
     pairnw to id kai to bazw sto pedio edw, meta dimiourgw filia anamesa stous dio xristes
      */
-    @Column(name = "invited_by")
-    private String invitedBy;
+    @ManyToOne
+    @JoinColumn(name = "invited_by")
+    private User invitedBy;
+
+    @Column(name = "referral_token", nullable = false, unique = true)
+    private String referralToken = UUID.randomUUID().toString();
+
+    public String getReferralToken() {
+        return referralToken;
+    }
+
+    public void setReferralToken(String refToken) {
+        this.referralToken = refToken;
+    }
 
     public Role getUserRole() {
         return userRole;
@@ -67,11 +79,11 @@ public class User implements UserDetails {
         this.userRole = userRole;
     }
 
-    public String getInvitedBy() {
+    public User getInvitedBy() {
         return invitedBy;
     }
 
-    public void setInvitedBy(String invitedBy) {
+    public void setInvitedBy(User invitedBy) {
         this.invitedBy = invitedBy;
     }
 
