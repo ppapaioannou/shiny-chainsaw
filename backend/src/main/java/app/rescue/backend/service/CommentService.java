@@ -1,6 +1,6 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.dto.CommentDto;
+import app.rescue.backend.payload.CommentDto;
 import app.rescue.backend.model.Comment;
 import app.rescue.backend.model.Post;
 import app.rescue.backend.repository.CommentRepository;
@@ -23,20 +23,27 @@ public class CommentService {
         this.userRepository = userRepository;
     }
 
-    public void createNewComment(CommentDto commentDto) {
+    public Comment createNewComment(CommentDto commentDto) {
         Comment comment = mapFromDtoToComment(commentDto);
         commentRepository.save(comment);
+        return comment;
     }
 
     private Comment mapFromDtoToComment(CommentDto commentDto) {
         Comment comment = new Comment();
         Post post = postRepository.getById(Long.valueOf(commentDto.getPostId()));
-        if (post.getEnableComments() != true) {
+        if (!post.getEnableComments()) {
             throw new IllegalStateException("comments are not allowed on this post");
         }
         comment.setPost(post);
         comment.setText(commentDto.getText());
         comment.setUser(userRepository.findUserByEmail(userService.getCurrentUser()));
+
+        //if (!post.getCommentators().contains(comment.getUser())) {
+        post.addCommentator(comment.getUser());
+        //}
+
+
         return comment;
     }
 }

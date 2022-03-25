@@ -1,9 +1,11 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.dto.RegistrationDto;
+import app.rescue.backend.payload.RegistrationDto;
 import app.rescue.backend.model.*;
 import app.rescue.backend.util.EmailSender;
 import app.rescue.backend.util.EmailValidator;
+import app.rescue.backend.util.LocationHelper;
+import com.vividsolutions.jts.geom.Geometry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,15 +20,19 @@ public class RegistrationService {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
+    private final LocationHelper locationHelper;
+
     public RegistrationService(UserService userService, EmailValidator emailValidator,
-                               ConfirmationTokenService confirmationTokenService, EmailSender emailSender) {
+                               ConfirmationTokenService confirmationTokenService,
+                               EmailSender emailSender, LocationHelper locationHelper) {
         this.userService = userService;
         this.emailValidator = emailValidator;
         this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
+        this.locationHelper = locationHelper;
     }
 
-    public String register(RegistrationDto requestDto, String userRole, String referralToken) {
+    public User register(RegistrationDto requestDto, String userRole, String referralToken) {
         boolean isValidEmail = emailValidator.test(requestDto.getEmail());
 
         if (!isValidEmail) {
@@ -39,7 +45,7 @@ public class RegistrationService {
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
         emailSender.send(requestDto.getEmail(),buildEmail(requestDto.getName(), link));
 
-        return token;
+        return newUser;
     }
 
     /*
@@ -65,6 +71,15 @@ public class RegistrationService {
         if (userRole.equals("INDIVIDUAL")) {
             user = new Individual();
             ((Individual) user).setLastName(requestDto.getLastName());
+
+            //double latitude = 39.6649567814473;
+            //double longitude = 20.85393331551958;
+            //double diameterInMeters = 7000;
+
+            //Geometry userLocation = locationHelper.userLocationToCircle(latitude, longitude, diameterInMeters);
+
+            //((Individual) user).setLocation(userLocation);
+            //System.out.println(((Individual) user).getLocation());
         }
         else if (userRole.equals("ORGANIZATION")) {
             user = new Organization();
@@ -87,6 +102,21 @@ public class RegistrationService {
         user.setPhoneNumber(requestDto.getPhoneNumber());
         user.setDescription(requestDto.getDescription());
         user.setUserRole(Role.valueOf(userRole));
+
+        double latitude = 39.67215821189826;
+        //double longitude = 20.84114454275729;
+
+        //double latitude = 39.63654014728699;
+        double longitude = 20.86371801405526;
+
+
+        double diameterInMeters = 7000;
+
+        Geometry userLocation = locationHelper.userLocationToCircle(latitude, longitude, diameterInMeters);
+
+        user.setLocation(userLocation);
+
+
 
         return user;
     }

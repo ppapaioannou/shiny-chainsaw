@@ -7,6 +7,8 @@ import app.rescue.backend.repository.ConnectionRepository;
 import app.rescue.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 public class ConnectionService {
@@ -21,47 +23,55 @@ public class ConnectionService {
         this.userRepository = userRepository;
     }
 
-    public void connectWith(String userId) {
+    public Connection connectWith(String userId) {
+        //TODO check if already connected
         Connection connection = new Connection();
         connection.setUser(userRepository.findUserByEmail(userService.getCurrentUser()));
 
-        User connectedToUser = userRepository.findById(Long.valueOf(userId)).get();
-        connection.setConnectedTo(connectedToUser);
+        Optional<User> connectedToUser = userRepository.findById(Long.valueOf(userId));
 
-        //if (connectedToUser.isPresent()) {
-        //    connection.setConnectedTo(connectedToUser.get());
-        //}
-        if (connectedToUser.getUserRole() == Role.INDIVIDUAL) {
-            //TODO make connectionStatus to an ENUM
-            connection.setConnectionStatus("PENDING");
-        }
-        else if (connectedToUser.getUserRole() == Role.ORGANIZATION) {
-            connection.setConnectionStatus("FOLLOWER");
+        if (connectedToUser.isPresent()) {
+            User user = connectedToUser.get();
+            connection.setConnectedTo(user);
+            if (user.getUserRole() == Role.INDIVIDUAL) {
+                //TODO make connectionStatus to an ENUM
+                connection.setConnectionStatus("PENDING");
+            }
+            else if (user.getUserRole() == Role.ORGANIZATION) {
+                connection.setConnectionStatus("FOLLOWER");
+            }
+            else {
+                throw new IllegalStateException("not a user");
+            }
+            connectionRepository.save(connection);
         }
         else {
-            throw new IllegalStateException("not a user");
+            throw new IllegalStateException("User does not exist");
         }
 
-        connectionRepository.save(connection);
-
-
-
+        return connection;
     }
 
-    public void acceptConnection(String userId) {
+    public Connection acceptConnection(String userId) {
         Connection connection = new Connection();
 
         User loggedInUser = userRepository.findUserByEmail(userService.getCurrentUser());
         connection.setUser(loggedInUser);
 
-        User connectedToUser = userRepository.findById(Long.valueOf(userId)).get();
-        connection.setConnectedTo(connectedToUser);
+        Optional<User> connectedToUser = userRepository.findById(Long.valueOf(userId));
+        if (connectedToUser.isPresent()) {
+            User user = connectedToUser.get();
+            connection.setConnectedTo(user);
+            connection.setConnectionStatus("CONNECTED");
 
-        connection.setConnectionStatus("CONNECTED");
+            connectionRepository.save(connection);
 
-        connectionRepository.save(connection);
-
-        connectionRepository.connect(connectedToUser, loggedInUser);
+            connectionRepository.connect(user, loggedInUser);
+        }
+        else {
+            throw new IllegalStateException("User does not exist");
+        }
+        return connection;
     }
 
     public void connect(User userOne, User userTwo) {

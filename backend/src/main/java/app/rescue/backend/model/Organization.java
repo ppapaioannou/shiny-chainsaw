@@ -3,7 +3,7 @@ package app.rescue.backend.model;
 import javax.persistence.*;
 
 @Entity
-@Table()
+@Table(name = "organization")
 public class Organization extends User {
 
     @Column(name = "contact_email", unique = true)

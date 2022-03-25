@@ -1,18 +1,13 @@
 package app.rescue.backend.model;
 
-import org.geolatte.geom.Geometry;
-
 import javax.persistence.*;
 
 @Entity
-@Table()
+@Table(name = "animal_post")
 public class AnimalPost extends Post {
 
     @Column(name = "animal_type")
     private String animalType;
-
-    @Column(name = "location")
-    private Geometry animalLocation;
 
     @Column(name = "breed")
     private String breed;
@@ -56,14 +51,6 @@ public class AnimalPost extends Post {
 
     public void setBreed(String breed) {
         this.breed = breed;
-    }
-
-    public Geometry getAnimalLocation() {
-        return animalLocation;
-    }
-
-    public void setAnimalLocation(Geometry location) {
-        this.animalLocation = location;
     }
 
     public String getAnimalType() {

@@ -31,6 +31,18 @@ public class Notification {
     @Column(name = "read_at")
     private LocalDateTime readAt;
 
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
     public LocalDateTime getReadAt() {
         return readAt;
     }

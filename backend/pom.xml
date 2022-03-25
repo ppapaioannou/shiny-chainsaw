@@ -59,6 +59,21 @@
             <artifactId>geolatte-geom</artifactId>
             <version>1.8.2</version>
         </dependency>
+		<dependency>
+			<groupId>com.vividsolutions</groupId>
+			<artifactId>jts</artifactId>
+			<version>1.13</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wololo</groupId>
+			<artifactId>jts2geojson</artifactId>
+			<version>0.17.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sipios</groupId>
+			<artifactId>spring-search</artifactId>
+			<version>0.2.4</version>
+		</dependency>
     </dependencies>
 
 	<build>

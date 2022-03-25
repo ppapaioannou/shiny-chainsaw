@@ -1,7 +1,5 @@
 package app.rescue.backend.model;
 
-import org.geolatte.geom.Geometry;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -9,18 +7,15 @@ import java.sql.Date;
 import java.sql.Time;
 
 @Entity
-@Table()
+@Table(name = "event_post")
 public class EventPost extends Post {
-    @Column(name = "address")
+    @Column(name = "event_address")
     private String eventAddress;
 
-    @Column(name = "location")
-    private Geometry eventLocation;
-
-    @Column(name = "date")
+    @Column(name = "event_date")
     private Date eventDate;
 
-    @Column(name = "time")
+    @Column(name = "event_time")
     private Time eventTime;
 
     public Time getEventTime() {
@@ -37,14 +32,6 @@ public class EventPost extends Post {
 
     public void setEventDate(Date date) {
         this.eventDate = date;
-    }
-
-    public Geometry getEventLocation() {
-        return eventLocation;
-    }
-
-    public void setEventLocation(Geometry location) {
-        this.eventLocation = location;
     }
 
     public String getEventAddress() {

@@ -1,5 +1,7 @@
 package app.rescue.backend.model;
 
+import com.vividsolutions.jts.geom.Geometry;
+import org.hibernate.Hibernate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,6 +64,18 @@ public class User implements UserDetails {
 
     @Column(name = "referral_token", nullable = false, unique = true)
     private String referralToken = UUID.randomUUID().toString();
+
+    @Lob
+    @Column(name = "location")
+    private Geometry location;
+
+    public Geometry getLocation() {
+        return location;
+    }
+
+    public void setLocation(Geometry location) {
+        this.location = location;
+    }
 
     public String getReferralToken() {
         return referralToken;
@@ -191,5 +205,18 @@ public class User implements UserDetails {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        User user = (User) o;
+        return id != null && Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

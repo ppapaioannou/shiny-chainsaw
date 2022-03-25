@@ -1,9 +1,13 @@
 package app.rescue.backend.model;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
@@ -41,6 +45,60 @@ public class Post {
 
     @Column(name = "enable_comments", nullable = false)
     private Boolean enableComments = true;
+
+    @Lob
+    @Column(name = "location")
+    private Geometry location;
+
+    @OneToOne(orphanRemoval = true)
+    @JoinColumn(name = "animal_characteristics_id")
+    private AnimalCharacteristics animalCharacteristics;
+
+    @ManyToMany
+    @JoinTable(name = "post_users",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "users_id"))
+    private Set<User> commentators = new LinkedHashSet<>();
+
+    public void addCommentator(User commentator) {
+        commentators.add(commentator);
+    }
+
+    public Set<User> getCommentators() {
+        return commentators;
+    }
+
+    public void setCommentators(Set<User> commentators) {
+        this.commentators = commentators;
+    }
+
+    public AnimalCharacteristics getAnimalCharacteristics() {
+        return animalCharacteristics;
+    }
+
+    public void setAnimalCharacteristics(AnimalCharacteristics animalCharacteristics) {
+        this.animalCharacteristics = animalCharacteristics;
+    }
+/*
+    @Column(name = "distance")
+    private Double distance;
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
+    }
+    */
+
+    public Geometry getLocation() {
+        return location;
+    }
+
+    public void setLocation(Geometry location) {
+        this.location = location;
+    }
 
     public Boolean getEnableComments() {
         return enableComments;

@@ -5,6 +5,16 @@ import javax.persistence.*;
 @Entity
 @Table(name = "comment")
 public class Comment {
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id=" + id +
+                ", user=" + user.getName() +
+                ", post=" + post.getTitle() +
+                ", text='" + text + '\'' +
+                '}';
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

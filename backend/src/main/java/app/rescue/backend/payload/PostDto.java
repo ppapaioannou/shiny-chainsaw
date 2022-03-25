@@ -1,4 +1,4 @@
-package app.rescue.backend.dto;
+package app.rescue.backend.payload;
 
 import lombok.Data;
 
@@ -12,10 +12,12 @@ public class PostDto {
     private final String body;
     private final String postStatus;
     private final Boolean enableComments;
+    private final String latitude;
+    private final String longitude;
 
     //event fields
     private final String eventAddress;
-    private final String eventLocation; //Geometry
+    //private final String eventLocation; //Geometry
     private final String eventDate;
     private final String eventTime;
     //private final Boolean enableEventDiscussion;
@@ -25,10 +27,11 @@ public class PostDto {
 
     //animal fields
     private final String animalType;
-    private final String animalLocation;
+    //private final String animalLocation;
     private final String breed;
     private final String gender;
     private final String color;
+    private final String[] colors;
     private final String size;
 
     //missing fields

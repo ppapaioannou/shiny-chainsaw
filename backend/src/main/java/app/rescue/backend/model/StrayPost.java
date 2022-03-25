@@ -6,9 +6,9 @@ import javax.persistence.Table;
 import java.sql.Date;
 
 @Entity
-@Table()
+@Table(name = "stray_post")
 public class StrayPost extends AnimalPost {
-    @Column(name = "date")
+    @Column(name = "stray_date")
     private Date strayDate;
 
     @Column(name = "actions_taken")

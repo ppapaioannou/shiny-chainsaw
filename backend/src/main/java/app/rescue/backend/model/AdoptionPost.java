@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table()
+@Table(name = "adoption_post")
 public class AdoptionPost extends AnimalPost {
     @Column(name = "age")
     private String age;
@@ -13,7 +13,7 @@ public class AdoptionPost extends AnimalPost {
     @Column(name = "neutered")
     private Boolean neutered;
 
-    @Column(name = "microchip_number")
+    @Column(name = "adoption_microchip_number")
     private String adoptionMicrochipNumber;
 
     @Column(name = "good_with_children")

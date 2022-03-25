@@ -4,6 +4,8 @@ import app.rescue.backend.model.*;
 import app.rescue.backend.repository.ConnectionRepository;
 import app.rescue.backend.repository.ImageRepository;
 import app.rescue.backend.repository.UserRepository;
+import app.rescue.backend.util.LocationHelper;
+import com.vividsolutions.jts.geom.Geometry;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -65,6 +67,9 @@ public class UserService implements UserDetailsService {
             if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.INDIVIDUAL) {
                 connectionRepository.save(new Connection(user, invitedByUser, "CONNECTED"));
                 connectionRepository.save(new Connection(invitedByUser, user, "CONNECTED"));
+            }
+            else if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.ORGANIZATION) {
+                connectionRepository.save(new Connection(user, invitedByUser, "FOLLOWER"));
             }
             //TODO this needs fixin'
 

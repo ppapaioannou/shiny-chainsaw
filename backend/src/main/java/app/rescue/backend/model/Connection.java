@@ -21,6 +21,16 @@ public class Connection {
     @Column(name = "connection_status")
     private String connectionStatus;
 
+    @Override
+    public String toString() {
+        return "Connection{" +
+                "id=" + id +
+                ", user=" + user.getName() +
+                ", connectedTo=" + connectedTo.getName() +
+                ", connectionStatus='" + connectionStatus + '\'' +
+                '}';
+    }
+
     public Connection(){
 
     }

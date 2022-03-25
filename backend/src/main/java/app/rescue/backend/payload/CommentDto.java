@@ -1,4 +1,4 @@
-package app.rescue.backend.dto;
+package app.rescue.backend.payload;
 
 import lombok.Data;
 

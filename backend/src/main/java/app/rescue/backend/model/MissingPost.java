@@ -6,12 +6,12 @@ import javax.persistence.Table;
 import java.sql.Date;
 
 @Entity
-@Table()
+@Table(name = "missing_post")
 public class MissingPost extends AnimalPost {
-    @Column(name = "date")
+    @Column(name = "missing_date")
     private Date missingDate;
 
-    @Column(name = "microchip_number")
+    @Column(name = "missing_microchip_number")
     private String missingMicrochipNumber;
 
     public String getMissingMicrochipNumber() {

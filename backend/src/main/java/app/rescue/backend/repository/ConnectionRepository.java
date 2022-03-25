@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
@@ -15,4 +17,6 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     @Modifying
     @Query("UPDATE Connection c " + "SET c.connectionStatus = 'CONNECTED' WHERE c.user = ?1 AND c.connectedTo = ?2")
     void connect(User userOne, User userTwo);
+
+    List<Connection> findConnectionsByUser(User user);
 }
