@@ -1,13 +1,10 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.payload.RegistrationDto;
 import app.rescue.backend.model.*;
+import app.rescue.backend.payload.request.RegistrationRequest;
 import app.rescue.backend.util.EmailSender;
 import app.rescue.backend.util.EmailValidator;
-import app.rescue.backend.util.LocationHelper;
-import com.vividsolutions.jts.geom.Geometry;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -16,112 +13,39 @@ public class RegistrationService {
 
     private final UserService userService;
     private final EmailValidator emailValidator;
-
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
+    private final ConnectionService connectionService;
 
-    private final LocationHelper locationHelper;
 
     public RegistrationService(UserService userService, EmailValidator emailValidator,
                                ConfirmationTokenService confirmationTokenService,
-                               EmailSender emailSender, LocationHelper locationHelper) {
+                               EmailSender emailSender, ConnectionService connectionService) {
         this.userService = userService;
         this.emailValidator = emailValidator;
         this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
-        this.locationHelper = locationHelper;
+        this.connectionService = connectionService;
     }
 
-    public User register(RegistrationDto requestDto, String userRole, String referralToken) {
-        boolean isValidEmail = emailValidator.test(requestDto.getEmail());
+    public User register(RegistrationRequest requestDto, String userRole, String referralToken) {
+        boolean isValidEmail = emailValidator.check(requestDto.getEmail());
 
         if (!isValidEmail) {
             throw new IllegalStateException("email not valid");
         }
-        User newUser = mapFromDtoToUser(requestDto, userRole);
+        User newUser = mapFromRequestToUser(requestDto, userRole);
 
         String token = userService.signUpUser(newUser, referralToken);
 
+        invitationRegistration(newUser, referralToken);
+
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
-        emailSender.send(requestDto.getEmail(),buildEmail(requestDto.getName(), link));
+        emailSender.send(requestDto.getEmail(), buildEmail(requestDto.getName(), link));
 
         return newUser;
     }
 
-    /*
-    public String registerInvited(RegistrationDto requestDto, String referralToken, String userRole) {
-        boolean isValidEmail = emailValidator.test(requestDto.getEmail());
-
-        if (!isValidEmail) {
-            throw new IllegalStateException("email not valid");
-        }
-        User newUser = mapFromDtoToUser(requestDto, userRole);
-
-        String token = userService.signUpUser(newUser, referralToken);
-
-        String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
-        emailSender.send(requestDto.getEmail(),buildEmail(requestDto.getName(), link));
-
-        return token;
-    }
-    */
-
-    private User mapFromDtoToUser(RegistrationDto requestDto, String userRole) {
-        User user;
-        if (userRole.equals("INDIVIDUAL")) {
-            user = new Individual();
-            ((Individual) user).setLastName(requestDto.getLastName());
-
-            //double latitude = 39.6649567814473;
-            //double longitude = 20.85393331551958;
-            //double diameterInMeters = 7000;
-
-            //Geometry userLocation = locationHelper.userLocationToCircle(latitude, longitude, diameterInMeters);
-
-            //((Individual) user).setLocation(userLocation);
-            //System.out.println(((Individual) user).getLocation());
-        }
-        else if (userRole.equals("ORGANIZATION")) {
-            user = new Organization();
-            ((Organization) user).setContactEmail(requestDto.getContactEmail());
-            ((Organization) user).setRegion(requestDto.getRegion());
-            ((Organization) user).setAddress(requestDto.getAddress());
-            ((Organization) user).setCity(requestDto.getCity());
-            ((Organization) user).setZipCode(requestDto.getZipCode());
-            ((Organization) user).setWebsiteUrl(requestDto.getWebsiteUrl());
-            ((Organization) user).setFacebookPageUrl(requestDto.getFacebookPageUrl());
-            ((Organization) user).setOrganizationNeeds(requestDto.getOrganizationNeeds());
-        }
-        else {
-            throw new IllegalStateException("unknown role");
-        }
-        user.setEmail(requestDto.getEmail());
-        user.setPassword(requestDto.getPassword());
-        user.setName(requestDto.getName());
-        user.setProfileImage(new Image("profileImage", requestDto.getProfileImageData()));
-        user.setPhoneNumber(requestDto.getPhoneNumber());
-        user.setDescription(requestDto.getDescription());
-        user.setUserRole(Role.valueOf(userRole));
-
-        double latitude = 39.67215821189826;
-        //double longitude = 20.84114454275729;
-
-        //double latitude = 39.63654014728699;
-        double longitude = 20.86371801405526;
-
-
-        double diameterInMeters = 7000;
-
-        Geometry userLocation = locationHelper.userLocationToCircle(latitude, longitude, diameterInMeters);
-
-        user.setLocation(userLocation);
-
-
-
-        return user;
-    }
-
-    @Transactional
     public String confirmToken(String token) {
         ConfirmationToken confirmationToken = confirmationTokenService.getToken(token).orElseThrow(() ->
                 new IllegalStateException("token not found"));
@@ -137,11 +61,57 @@ public class RegistrationService {
         }
 
         confirmationTokenService.setConfirmedAt(token);
-        userService.enableUser(
-                confirmationToken.getUser().getEmail());
+        userService.enableUser(confirmationToken.getUser().getEmail());
+
+        connectionService.completeRefConnection(confirmationToken.getUser());
         return "confirmed";
     }
 
+    //TODO create mapper class to handle this conversion
+    private User mapFromRequestToUser(RegistrationRequest requestDto, String userRole) {
+        User user = new User();
+        user.setEmail(requestDto.getEmail());
+        user.setPassword(requestDto.getPassword());
+        user.setName(requestDto.getName());
+
+        user.setProfileImage(requestDto.getProfileImageData());
+        user.setPhoneNumber(requestDto.getPhoneNumber());
+        user.setDescription(requestDto.getDescription());
+        user.setUserRole(Role.valueOf(userRole));
+
+        if (userRole.equals("INDIVIDUAL")) {
+            IndividualInformation individualInformation = new IndividualInformation();
+            individualInformation.setLastName(requestDto.getLastName());
+            //individualInformation.setDateOfBirth(Date.valueOf(requestDto.getDateOfBirth()));
+            user.setIndividualInformation(individualInformation);
+        }
+        else if (userRole.equals("ORGANIZATION")) {
+            OrganizationInformation organizationInformation = new OrganizationInformation();
+            organizationInformation.setContactEmail(requestDto.getContactEmail());
+            organizationInformation.setRegion(requestDto.getRegion());
+            organizationInformation.setAddress(requestDto.getAddress());
+            organizationInformation.setCity(requestDto.getCity());
+            organizationInformation.setZipCode(requestDto.getZipCode());
+            organizationInformation.setWebsiteUrl(requestDto.getWebsiteUrl());
+            organizationInformation.setFacebookPageUrl(requestDto.getFacebookPageUrl());
+            organizationInformation.setOrganizationNeeds(requestDto.getOrganizationNeeds());
+            user.setOrganizationInformation(organizationInformation);
+        }
+        else {
+            throw new IllegalStateException("unknown role");
+        }
+
+        return user;
+    }
+
+    private void invitationRegistration(User user, String referralToken) {
+        if (referralToken != null) {
+            User invitedByUser = userService.findByReferralToken(referralToken);
+            user.setInvitedByUserId(invitedByUser.getId());
+            connectionService.invitationRegistration(user, invitedByUser);
+
+        }
+    }
 
     private String buildEmail(String name, String link) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +

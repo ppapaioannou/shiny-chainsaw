@@ -1,7 +1,8 @@
 package app.rescue.backend.controller;
 
 import app.rescue.backend.model.User;
-import app.rescue.backend.payload.RegistrationDto;
+import app.rescue.backend.payload.request.RegistrationRequest;
+//import app.rescue.backend.service.NotificationService;
 import app.rescue.backend.service.NotificationService;
 import app.rescue.backend.service.RegistrationService;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,8 @@ import java.util.Locale;
 @RequestMapping(path = "api/v1/registration")
 public class RegistrationController {
 
+    //TODO resend confirmation mail
+
     private final RegistrationService registrationService;
     private final NotificationService notificationService;
 
@@ -22,28 +25,21 @@ public class RegistrationController {
         this.notificationService = notificationService;
     }
 
-    //@PostMapping(path = "{userRole}")
-    @PostMapping(value = {"{userRole}", "/ref/{referralToken}/{userRole}"})
-    public ResponseEntity<String> register(@RequestBody RegistrationDto registrationDto,
-                                   @PathVariable String userRole,
-                                   @PathVariable(required = false) String referralToken) {
+
+    @PostMapping(path = {"{userRole}", "/ref/{referralToken}/{userRole}"})
+    public ResponseEntity<String> register(@RequestBody RegistrationRequest registrationDto, @PathVariable String userRole,
+                                           @PathVariable(required = false) String referralToken) {
         User newUser = registrationService.register(registrationDto, userRole.toUpperCase(Locale.ROOT), referralToken);
         if (referralToken != null) {
-            notificationService.sendInvitationCompleteNotification(newUser);
+
+            notificationService.sendInvitationCompletedNotification(newUser);
         }
-        return new ResponseEntity<>(newUser.getName(), HttpStatus.OK);
+        //if (newUser.getUserRole().equals(Role.ORGANIZATION)) {
+        //    //TODO send proximity notification about new organization near
+        //}
+        return new ResponseEntity<>(HttpStatus.OK);
 
     }
-
-    /*
-    @PostMapping(path = "ref/{refToken}/{userRole}")
-    public String registerFromInvitation(@RequestBody RegistrationDto request,
-                                         @PathVariable String referralToken,
-                                         @PathVariable String userRole) {
-        return registrationService.registerInvited(request, referralToken, userRole.toUpperCase(Locale.ROOT));
-    }
-    */
-
 
     @GetMapping(path = "confirm")
     public String confirm(@RequestParam("token") String token) {

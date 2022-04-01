@@ -1,22 +1,20 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
-import app.rescue.backend.repository.ConnectionRepository;
-import app.rescue.backend.repository.ImageRepository;
+//import app.rescue.backend.repository.ConnectionRepository;
+import app.rescue.backend.payload.request.UserLocationRequest;
+import app.rescue.backend.repository.IndividualInformationRepository;
+import app.rescue.backend.repository.OrganizationInformationRepository;
 import app.rescue.backend.repository.UserRepository;
-import app.rescue.backend.util.LocationHelper;
 import com.vividsolutions.jts.geom.Geometry;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -24,96 +22,201 @@ public class UserService implements UserDetailsService {
     private final static String USER_NOT_FOUND_MSG = "user with email %s not found";
 
     private final UserRepository userRepository;
-    private final ImageRepository imageRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final ConfirmationTokenService confirmationTokenService;
-    //private final ConnectionService connectionService;
-    private final ConnectionRepository connectionRepository;
+    private final IndividualInformationRepository individualInformationRepository;
+    private final OrganizationInformationRepository organizationInformationRepository;
 
-    public UserService(UserRepository userRepository, ImageRepository imageRepository,
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private final ConfirmationTokenService confirmationTokenService;
+    private final LocationService locationService;
+
+    public UserService(UserRepository userRepository, IndividualInformationRepository individualInformationRepository,
+                       OrganizationInformationRepository organizationInformationRepository,
                        BCryptPasswordEncoder bCryptPasswordEncoder,
-                       ConfirmationTokenService confirmationTokenService, ConnectionRepository connectionRepository) {
+                       ConfirmationTokenService confirmationTokenService, LocationService locationService) {
         this.userRepository = userRepository;
-        this.imageRepository = imageRepository;
+        this.individualInformationRepository = individualInformationRepository;
+        this.organizationInformationRepository = organizationInformationRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.confirmationTokenService = confirmationTokenService;
-        this.connectionRepository = connectionRepository;
+        this.locationService = locationService;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email)
-            throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email).orElseThrow(() ->
                 new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
     }
 
-    public String signUpUser(User user, String referralToken) {
-        boolean userExists = userRepository.findByEmail(user.getEmail()).isPresent();
-
-        if (userExists) {
-            // TODO check if attributes are the same and if email not confirmed send confirmation email.
-            throw new IllegalStateException("email already taken");
-        }
-        String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
-
-        user.setPassword(encodedPassword);
-
-        if (referralToken != null) {
-            User invitedByUser = userRepository.findByReferralToken(referralToken);
-            user.setInvitedBy(invitedByUser);
-            userRepository.save(user);
-
-            //connectionService.connect(user, invitedByUser);
-            if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.INDIVIDUAL) {
-                connectionRepository.save(new Connection(user, invitedByUser, "CONNECTED"));
-                connectionRepository.save(new Connection(invitedByUser, user, "CONNECTED"));
+    public String signUpUser(User newUser, String referralToken) {
+        Optional<User> userExists = userRepository.findByEmail(newUser.getEmail());
+        if (userExists.isPresent()) {
+            if (userExists.get().isEnabled()) {
+                throw new IllegalStateException("User with that email already exists");
             }
-            else if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.ORGANIZATION) {
-                connectionRepository.save(new Connection(user, invitedByUser, "FOLLOWER"));
-            }
-            //TODO this needs fixin'
-
-        }
-        else {
-            userRepository.save(user);
+            userRepository.delete(userExists.get());
         }
 
+        String encodedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
+        newUser.setPassword(encodedPassword);
 
+        userRepository.save(newUser);
 
-        //TODO create ImageService class to handle all image operations
-        Image profileImage = user.getProfileImage();
-        profileImage.setUser(user);
-        imageRepository.save(profileImage);
+        if (newUser.getUserRole().equals(Role.INDIVIDUAL)) {
+            individualInformationRepository.setIndividualInformationUser(newUser.getIndividualInformation(), newUser);
+        }
+        else if (newUser.getUserRole().equals(Role.ORGANIZATION)) {
+            organizationInformationRepository.setOrganizationInformationUser(newUser.getOrganizationInformation(), newUser);
+        }
 
-        String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken = createConfirmationToken(newUser);
 
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                user
-        );
+        return confirmationToken.getToken();
+    }
 
+    public void enableUser(String email) {
+        userRepository.enableUser(email);
+    }
+
+    public void updateUserLocation(UserLocationRequest request, String userName) {
+        User user = getUserByEmail(userName);
+        Geometry userLocation = null;
+        if (request.getLatitude() != null && request.getLongitude() != null) {
+            double latitude = Double.parseDouble(request.getLatitude());
+            double longitude = Double.parseDouble(request.getLongitude());
+            double diameterInMeters = Double.parseDouble(request.getDiameterInMeters());
+            userLocation = locationService.userLocationToCircle(latitude, longitude, diameterInMeters);
+        }
+        user.setLocation(userLocation);
+        userRepository.save(user);
+
+    }
+
+    public void deleteUserAccount(String userName) {
+        User user = getUserByEmail(userName);
+        userRepository.delete(user);
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() ->
+                new IllegalStateException(String.format(USER_NOT_FOUND_MSG, email)));
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(String.format("User with ID:%s does not exist", id)));
+    }
+
+    public boolean tryToFindUserById(Long id) {
+        return userRepository.findById(id).isPresent();
+    }
+
+    public User findByReferralToken(String referralToken) {
+        return userRepository.findByReferralToken(referralToken).orElseThrow(() ->
+                new IllegalStateException("Not a referral token"));
+    }
+
+    public Collection<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    private ConfirmationToken createConfirmationToken(User newUser) {
+        ConfirmationToken confirmationToken = new ConfirmationToken(newUser);
         confirmationTokenService.saveConfirmationToken(confirmationToken);
-
-        return token;
-
+        return confirmationToken;
     }
 
-    public int enableUser(String email) {
-        return userRepository.enableUser(email);
-    }
 
-    public String getCurrentUser() {
+
+
+
+
+
+
+/*
+    public String getCurrentUserEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String currentUserName = authentication.getName();
-            return currentUserName;
+            return authentication.getName();
         }
         else {
             throw new IllegalStateException("No user logged in");
         }
     }
 
+    public List<UserResponse> getAllUsers(String userRole) {
+        List<User> users = userRepository.findAllByUserRole(Role.valueOf(userRole));
+        return users.stream().map(this::mapFromUserToResponse).collect(Collectors.toList());
+    }
 
+    public UserResponse getSingleUser(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isPresent()) {
+            return mapFromUserToResponse(user.get());
+        }
+        else {
+            throw new IllegalStateException("User does not exist.");
+        }
+
+    }
+*/
+    /*
+    public void updateUserInfo(RegistrationDto userUpdate, Long userId) {
+        //TODO make sure the user is updating their own info
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.getUserRole().equals(Role.INDIVIDUAL)) {
+                updateIndividualInfo(user, userUpdate);
+            }
+            else if (user.getUserRole().equals(Role.ORGANIZATION)) {
+                updateOrganizationInfo(user, userUpdate);
+            }
+        }
+        else {
+            throw new IllegalStateException("User does not exist.");
+        }
+    }
+
+    private void updateIndividualInfo(User user, RegistrationDto userUpdate) {
+        user.setName(userUpdate.getName());
+        user.setPhoneNumber(userUpdate.getPhoneNumber());
+        user.setDescription(userUpdate.getDescription());
+        ((Individual) user).setLastName(userUpdate.getLastName());
+        if (userUpdate.getDateOfBirth() != null) {
+            ((Individual) user).setDateOfBirth(Date.valueOf(userUpdate.getDateOfBirth()));
+        }
+
+
+        userRepository.save(user);
+
+
+    }
+
+     private void updateOrganizationInfo(User user, RegistrationDto userUpdate) {
+    }
+    */
+/*
+    public void deleteUserAccount() {
+        //String email = getCurrentUserEmail();
+        User user = userRepository.findUserByEmail(getCurrentUserEmail());
+        userRepository.delete(user);
+    }
+*/
+
+
+/*
+    private UserResponse mapFromUserToResponse(User user) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setName(user.getName());
+        if (user.getUserRole().equals(Role.INDIVIDUAL)) {
+            userResponse.setLastName(((Individual) user).getLastName());
+        }
+        //else if (user.getUserRole().equals(Role.ORGANIZATION)) {
+            //userResponse.setLastName("");
+        //}
+
+        return userResponse;
+    }
+*/
 }

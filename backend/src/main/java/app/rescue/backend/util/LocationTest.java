@@ -1,6 +1,7 @@
 package app.rescue.backend.util;
 
 
+import app.rescue.backend.service.LocationService;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -11,7 +12,7 @@ public class LocationTest {
 
     public static void main(String[] args) {
 
-        LocationHelper locationHelper = new LocationHelper();
+        LocationService locationHelper = new LocationService();
         double latitude = 39.6649567814473;
         double longitude = 20.85393331551958;
         double diameterInMeters = 7000;

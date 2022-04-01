@@ -11,37 +11,28 @@ public class Notification {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
-    private User sender;
-
-    @Column(name = "text")
-    private String text;
-
-    @Column(name = "notification_type")
-    private String notificationType;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "read_at")
-    private LocalDateTime readAt;
+    @Column(name = "sender_id")
+    private Long senderId;
 
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
 
-    public Post getPost() {
-        return post;
-    }
+    @Column(name = "text", nullable = false)
+    private String text;
 
-    public void setPost(Post post) {
-        this.post = post;
-    }
+    @Column(name = "notification_type", nullable = false)
+    private String notificationType;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "read_at")
+    private LocalDateTime readAt;
 
     public LocalDateTime getReadAt() {
         return readAt;
@@ -55,8 +46,8 @@ public class Notification {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime created_at) {
-        this.createdAt = created_at;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getNotificationType() {
@@ -75,12 +66,20 @@ public class Notification {
         this.text = text;
     }
 
-    public User getSender() {
-        return sender;
+    public Post getPost() {
+        return post;
     }
 
-    public void setSender(User sender) {
-        this.sender = sender;
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
+    public Long getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(Long senderId) {
+        this.senderId = senderId;
     }
 
     public User getUser() {

@@ -3,14 +3,15 @@ package app.rescue.backend.model;
 import com.vividsolutions.jts.geom.Geometry;
 
 import javax.persistence.*;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Entity
-@Inheritance(strategy=InheritanceType.JOINED)
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @Table(name = "post")
 public class Post {
     @Id
@@ -18,9 +19,22 @@ public class Post {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @JoinTable(name = "commentators", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "users_id"))
+    private Collection<User> commentators = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Notification> notificationsSent = new ArrayList<>();
+
+    @Column(name = "enable_comments", nullable = false)
+    private Boolean enableComments = true;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -31,66 +45,38 @@ public class Post {
     @Column(name = "post_type", nullable = false)
     private String postType;
 
-    @Column(name = "post_status", nullable = false)
-    private String postStatus;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Transient
-    private List<Image> images;
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private AnimalCharacteristics animalCharacteristics;
 
-    @Column(name = "enable_comments", nullable = false)
-    private Boolean enableComments = true;
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private EventProperties eventProperties;
+
+    @Column(name = "date")
+    private Date date = Date.valueOf(LocalDate.now());
 
     @Lob
     @Column(name = "location")
     private Geometry location;
 
-    @OneToOne(orphanRemoval = true)
-    @JoinColumn(name = "animal_characteristics_id")
-    private AnimalCharacteristics animalCharacteristics;
+    @Lob
+    @ElementCollection
+    @Column(name = "image")
+    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
+    private Collection<Byte[]> images = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(name = "post_users",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "users_id"))
-    private Set<User> commentators = new LinkedHashSet<>();
-
-    public void addCommentator(User commentator) {
-        commentators.add(commentator);
+    public Collection<Byte[]> getImages() {
+        return images;
     }
 
-    public Set<User> getCommentators() {
-        return commentators;
+    public void setImages(Collection<Byte[]> images) {
+        this.images = images;
     }
-
-    public void setCommentators(Set<User> commentators) {
-        this.commentators = commentators;
-    }
-
-    public AnimalCharacteristics getAnimalCharacteristics() {
-        return animalCharacteristics;
-    }
-
-    public void setAnimalCharacteristics(AnimalCharacteristics animalCharacteristics) {
-        this.animalCharacteristics = animalCharacteristics;
-    }
-/*
-    @Column(name = "distance")
-    private Double distance;
-
-    public Double getDistance() {
-        return distance;
-    }
-
-    public void setDistance(Double distance) {
-        this.distance = distance;
-    }
-    */
 
     public Geometry getLocation() {
         return location;
@@ -100,20 +86,28 @@ public class Post {
         this.location = location;
     }
 
-    public Boolean getEnableComments() {
-        return enableComments;
+    public Date getDate() {
+        return date;
     }
 
-    public void setEnableComments(Boolean enableComments) {
-        this.enableComments = enableComments;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
-    public List<Image> getImages() {
-        return images;
+    public EventProperties getEventProperties() {
+        return eventProperties;
     }
 
-    public void setImages(List<Image> images) {
-        this.images = images;
+    public void setEventProperties(EventProperties eventProperties) {
+        this.eventProperties = eventProperties;
+    }
+
+    public AnimalCharacteristics getAnimalCharacteristics() {
+        return animalCharacteristics;
+    }
+
+    public void setAnimalCharacteristics(AnimalCharacteristics animalCharacteristics) {
+        this.animalCharacteristics = animalCharacteristics;
     }
 
     public LocalDateTime getUpdatedAt() {
@@ -130,14 +124,6 @@ public class Post {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public String getPostStatus() {
-        return postStatus;
-    }
-
-    public void setPostStatus(String postStatus) {
-        this.postStatus = postStatus;
     }
 
     public String getPostType() {
@@ -162,6 +148,43 @@ public class Post {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Boolean getEnableComments() {
+        return enableComments;
+    }
+
+    public void setEnableComments(Boolean enableComments) {
+        this.enableComments = enableComments;
+    }
+
+    public Collection<Notification> getNotificationsSent() {
+        return notificationsSent;
+    }
+
+    public void setNotificationsSent(Collection<Notification> notificationsSent) {
+        this.notificationsSent = notificationsSent;
+    }
+
+    public void addCommentator(User user) {
+        if (!commentators.contains(user)) {
+            commentators.add(user);
+        }
+    }
+    public Collection<User> getCommentators() {
+        return commentators;
+    }
+
+    public void setCommentators(Collection<User> commentators) {
+        this.commentators = commentators;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 
     public User getUser() {

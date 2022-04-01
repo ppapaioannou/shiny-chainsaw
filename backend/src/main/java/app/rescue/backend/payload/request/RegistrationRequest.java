@@ -1,10 +1,10 @@
-package app.rescue.backend.payload;
+package app.rescue.backend.payload.request;
 
 import lombok.Data;
 
 
 @Data
-public class RegistrationDto {
+public class RegistrationRequest {
     //common fields
     private final String email;
     private final String password;
@@ -15,7 +15,7 @@ public class RegistrationDto {
 
     //individual fields
     private final String lastName;
-    //private final String dateOfBirth;
+    private final String dateOfBirth;
 
     //Organization fields
     private final String contactEmail;

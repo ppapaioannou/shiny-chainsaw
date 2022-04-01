@@ -1,10 +1,16 @@
 package app.rescue.backend.model;
 
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "connection")
+@NoArgsConstructor
 public class Connection {
+    //TODO user - connectedToUserId
+    //this way if a connected user deletes their account then the connection remains
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -14,31 +20,27 @@ public class Connection {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "connected_to_id")
-    private User connectedTo;
+    @Column(name = "connected_to_id", nullable = false)
+    private Long connectedToId;
 
-    @Column(name = "connection_status")
+    @Column(name = "connection_status", nullable = false)
     private String connectionStatus;
 
-    @Override
-    public String toString() {
-        return "Connection{" +
-                "id=" + id +
-                ", user=" + user.getName() +
-                ", connectedTo=" + connectedTo.getName() +
-                ", connectionStatus='" + connectionStatus + '\'' +
-                '}';
-    }
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Connection(){
-
-    }
-
-    public Connection(User user, User connectedTo, String connectionStatus) {
+    public Connection(User user, Long connectedToId, String connectionStatus) {
         this.user = user;
-        this.connectedTo = connectedTo;
+        this.connectedToId = connectedToId;
         this.connectionStatus = connectionStatus;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getConnectionStatus() {
@@ -49,12 +51,12 @@ public class Connection {
         this.connectionStatus = connectionStatus;
     }
 
-    public User getConnectedTo() {
-        return connectedTo;
+    public Long getConnectedToId() {
+        return connectedToId;
     }
 
-    public void setConnectedTo(User connected_to) {
-        this.connectedTo = connected_to;
+    public void setConnectedToId(Long connectedToId) {
+        this.connectedToId = connectedToId;
     }
 
     public User getUser() {

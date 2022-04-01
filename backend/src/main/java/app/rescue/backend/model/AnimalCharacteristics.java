@@ -1,8 +1,6 @@
 package app.rescue.backend.model;
 
 import javax.persistence.*;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "animal_characteristics")
@@ -12,17 +10,15 @@ public class AnimalCharacteristics {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @OneToOne(cascade = CascadeType.ALL, optional = false, orphanRemoval = true)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
+
     @Column(name = "animal_type")
     private String animalType;
 
     @Column(name = "breed")
     private String breed;
-
-    //@ElementCollection
-    //@Column(name = "color")
-    //@CollectionTable(name = "animal_characteristics_color", joinColumns = @JoinColumn(name = "owner_id"))
-    //private Set<String> color = new LinkedHashSet<>();
-
 
     @Column(name = "gender")
     private String gender;
@@ -32,6 +28,72 @@ public class AnimalCharacteristics {
 
     @Column(name = "color")
     private String color;
+
+    @Column(name = "age")
+    private String age;
+
+    @Column(name = "microchip_number")
+    private String microchipNumber;
+
+    @Column(name = "neutered")
+    private Boolean neutered;
+
+    @Column(name = "good_with_animals")
+    private Boolean goodWithAnimals;
+
+    @Column(name = "good_with_children")
+    private Boolean goodWithChildren;
+
+    @Column(name = "actions_taken")
+    private String actionsTaken;
+
+    public String getActionsTaken() {
+        return actionsTaken;
+    }
+
+    public void setActionsTaken(String actionsTaken) {
+        this.actionsTaken = actionsTaken;
+    }
+
+    public Boolean getGoodWithChildren() {
+        return goodWithChildren;
+    }
+
+    public void setGoodWithChildren(Boolean goodWithChildren) {
+        this.goodWithChildren = goodWithChildren;
+    }
+
+    public Boolean getGoodWithAnimals() {
+        return goodWithAnimals;
+    }
+
+    public void setGoodWithAnimals(Boolean goodWithAnimals) {
+        this.goodWithAnimals = goodWithAnimals;
+    }
+
+    public Boolean getNeutered() {
+        return neutered;
+    }
+
+    public void setNeutered(Boolean neutered) {
+        this.neutered = neutered;
+    }
+
+    public String getMicrochipNumber() {
+        return microchipNumber;
+    }
+
+    public void setMicrochipNumber(String microchipNumber) {
+        this.microchipNumber = microchipNumber;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
 
     public String getColor() {
         return color;
@@ -57,14 +119,6 @@ public class AnimalCharacteristics {
         this.gender = gender;
     }
 
-    //public Set<String> getColor() {
-    //    return color;
-    //}
-
-    //public void setColor(Set<String> color) {
-    //    this.color = color;
-    //}
-
     public String getBreed() {
         return breed;
     }
@@ -79,6 +133,14 @@ public class AnimalCharacteristics {
 
     public void setAnimalType(String animalType) {
         this.animalType = animalType;
+    }
+
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
     }
 
     public Long getId() {

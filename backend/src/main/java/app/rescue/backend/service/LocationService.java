@@ -1,15 +1,13 @@
-package app.rescue.backend.util;
+package app.rescue.backend.service;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
-import org.geolatte.geom.crs.CoordinateReferenceSystem;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LocationHelper {
+public class LocationService {
 
     public Geometry postLocationToPoint(double latitude, double longitude) {
 

@@ -1,16 +1,17 @@
 package app.rescue.backend.model;
 
 import com.vividsolutions.jts.geom.Geometry;
-import org.hibernate.Hibernate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.UUID;
 
 @Entity
-@Inheritance(strategy=InheritanceType.JOINED)
 @Table(name = "user")
 public class User implements UserDetails {
     @Id
@@ -18,29 +19,35 @@ public class User implements UserDetails {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private Role userRole;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<ConfirmationToken> confirmationTokens = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Comment> comments = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "commentators", cascade = CascadeType.ALL)
+    private Collection<Post> commentedOnPosts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Notification> notifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Connection> connections = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "eventAttendees", cascade = CascadeType.ALL)
+    private Collection<EventProperties> eventProperties = new ArrayList<>();
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
-
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Transient
-    private Image profileImage;
-
-    @Column(name = "phone_number")
-    private String phoneNumber;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "community_standing", nullable = false)
-    private Long communityStanding = Long.valueOf(1);
-
-    @Enumerated(EnumType.STRING)
-    private Role userRole;
 
     @Column(name = "locked")
     private Boolean locked = false;
@@ -48,26 +55,65 @@ public class User implements UserDetails {
     @Column(name = "enabled")
     private Boolean enabled = false;
 
-    /*
-    idea gia edw
-    o xristis pataei ena koumpi "invite a friend",
-    auto dimiourgei ena link tou tipou "www.asdasf.com/signup/ref/[user_id]"
-    opou user_id to UUID tou xristi,
-    auto to link pigainei se mia selida gia signup kai molis oloklirwthei to signug
-    me string manipulation
-    e.g. k = myStr.lastIndexOf('/'); string.substring(k, string.length() - 1));
-    pairnw to id kai to bazw sto pedio edw, meta dimiourgw filia anamesa stous dio xristes
-     */
-    @ManyToOne
-    @JoinColumn(name = "invited_by")
-    private User invitedBy;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @Column(name = "referral_token", nullable = false, unique = true)
+    @Lob
+    @Column(name = "profile_image")
+    private Byte[] profileImage;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "desription")
+    private String description;
+
+    @Column(name = "community_standing", nullable = false)
+    private Long communityStanding = 1L;
+
+    //@ManyToOne(cascade = CascadeType.PERSIST)
+    //@JoinColumn(name = "invited_by_id")
+    //private User invitedBy;
+
+    @Column(name = "referral_token", nullable = false)
     private String referralToken = UUID.randomUUID().toString();
 
     @Lob
     @Column(name = "location")
     private Geometry location;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private IndividualInformation individualInformation;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private OrganizationInformation organizationInformation;
+
+    @Column(name = "invited_by_user_id")
+    private Long invitedByUserId;
+
+    public Long getInvitedByUserId() {
+        return invitedByUserId;
+    }
+
+    public void setInvitedByUserId(Long invitedByUserId) {
+        this.invitedByUserId = invitedByUserId;
+    }
+
+    public OrganizationInformation getOrganizationInformation() {
+        return organizationInformation;
+    }
+
+    public void setOrganizationInformation(OrganizationInformation organizationInformation) {
+        this.organizationInformation = organizationInformation;
+    }
+
+    public IndividualInformation getIndividualInformation() {
+        return individualInformation;
+    }
+
+    public void setIndividualInformation(IndividualInformation individualInformation) {
+        this.individualInformation = individualInformation;
+    }
 
     public Geometry getLocation() {
         return location;
@@ -81,18 +127,10 @@ public class User implements UserDetails {
         return referralToken;
     }
 
-    public void setReferralToken(String refToken) {
-        this.referralToken = refToken;
+    public void setReferralToken(String referralToken) {
+        this.referralToken = referralToken;
     }
-
-    public Role getUserRole() {
-        return userRole;
-    }
-
-    public void setUserRole(Role userRole) {
-        this.userRole = userRole;
-    }
-
+    /*
     public User getInvitedBy() {
         return invitedBy;
     }
@@ -100,7 +138,7 @@ public class User implements UserDetails {
     public void setInvitedBy(User invitedBy) {
         this.invitedBy = invitedBy;
     }
-
+    */
     public Long getCommunityStanding() {
         return communityStanding;
     }
@@ -125,22 +163,12 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
     }
 
-    public Image getProfileImage() {
+    public Byte[] getProfileImage() {
         return profileImage;
     }
 
-    public void setProfileImage(Image profileImage) {
-        if (profileImage.getData() != null) {
-            this.profileImage = profileImage;
-        }
-        else {
-            //TODO add default profile photo if nothing was provided
-            this.profileImage = defaultProfileImage();
-        }
-    }
-
-    private Image defaultProfileImage() {
-        return new Image("profileImage", null);
+    public void setProfileImage(Byte[] profileImage) {
+        this.profileImage = profileImage;
     }
 
     public String getName() {
@@ -153,13 +181,8 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority =
-                new SimpleGrantedAuthority(userRole.name());
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(userRole.name());
         return Collections.singletonList(authority);
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     @Override
@@ -187,6 +210,10 @@ public class User implements UserDetails {
         return enabled;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     public void setPassword(String password) {
         this.password = password;
     }
@@ -199,24 +226,75 @@ public class User implements UserDetails {
         this.email = email;
     }
 
+    public Collection<EventProperties> getEventProperties() {
+        return eventProperties;
+    }
+
+    public void setEventProperties(Collection<EventProperties> eventProperties) {
+        this.eventProperties = eventProperties;
+    }
+
+    public void setConnections(Collection<Connection> connections) {
+        this.connections = connections;
+    }
+
+    public Collection<Connection> getConnections() {
+        return connections;
+    }
+
+    public void setNotifications(Collection<Notification> notifications) {
+        this.notifications = notifications;
+    }
+
+    public Collection<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public Collection<Post> getCommentedOnPosts() {
+        return commentedOnPosts;
+    }
+
+    public void setCommentedOnPosts(Collection<Post> commentedOnPosts) {
+        this.commentedOnPosts = commentedOnPosts;
+    }
+
+    public void setComments(Collection<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public Collection<Comment> getComments() {
+        return comments;
+    }
+
+    public void setPosts(Collection<Post> posts) {
+        this.posts = posts;
+    }
+
+    public Collection<Post> getPosts() {
+        return posts;
+    }
+
+    public Collection<ConfirmationToken> getConfirmationTokens() {
+        return confirmationTokens;
+    }
+
+    public void setConfirmationTokens(Collection<ConfirmationToken> confirmationTokens) {
+        this.confirmationTokens = confirmationTokens;
+    }
+
+    public Role getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(Role userRole) {
+        this.userRole = userRole;
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        User user = (User) o;
-        return id != null && Objects.equals(id, user.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
     }
 }

@@ -1,89 +1,83 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.payload.PostDto;
+import app.rescue.backend.payload.request.PostRequest;
 import app.rescue.backend.model.*;
-import app.rescue.backend.payload.PostResponse;
+import app.rescue.backend.payload.resposne.PostResponse;
 import app.rescue.backend.repository.AnimalCharacteristicsRepository;
-import app.rescue.backend.repository.ImageRepository;
+import app.rescue.backend.repository.EventPropertiesRepository;
 import app.rescue.backend.repository.PostRepository;
-import app.rescue.backend.repository.UserRepository;
-import app.rescue.backend.util.LocationHelper;
 import com.vividsolutions.jts.geom.Geometry;
-import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class PostService {
 
+    private static final List<String> postTypes = List.of("missing", "adoption", "stray", "simple", "event");
+
     private final PostRepository postRepository;
-    private final UserService userService;
-    private final UserRepository userRepository;
-    private final ImageRepository imageRepository;
-    private final LocationHelper locationHelper;
-
     private final AnimalCharacteristicsRepository animalCharacteristicsRepository;
+    private final EventPropertiesRepository eventPropertiesRepository;
 
+    private final UserService userService;
+    private final LocationService locationService;
 
-
-    public PostService(PostRepository postRepository, UserService userService,
-                       UserRepository userRepository, ImageRepository imageRepository,
-                       LocationHelper locationHelper, AnimalCharacteristicsRepository animalCharacteristicsRepository) {
+    public PostService(PostRepository postRepository, AnimalCharacteristicsRepository animalCharacteristicsRepository,
+                       EventPropertiesRepository eventPropertiesRepository, UserService userService,
+                       LocationService locationService) {
         this.postRepository = postRepository;
-        this.userService = userService;
-        this.userRepository = userRepository;
-        this.imageRepository = imageRepository;
-        this.locationHelper = locationHelper;
         this.animalCharacteristicsRepository = animalCharacteristicsRepository;
+        this.eventPropertiesRepository = eventPropertiesRepository;
+        this.userService = userService;
+        this.locationService = locationService;
     }
 
-    public Post createNewAnimalPost(PostDto postDto, String postType) {
-        //Post post = mapFromDtoToAnimalPost(postDto, postType);
-        Post post = new Post();
-        post.setAnimalCharacteristics(mapFromDtoToAnimalCharacteristics(postDto));
 
-        postRepository.save(fillTheDetails(post, postDto, postType));
-        for(Image postImage: post.getImages()) {
-            postImage.setPost(post);
-            imageRepository.save(postImage);
+    public Post createNewPost(PostRequest request, String postType, String userName) {
+        if (!postTypes.contains(postType)) {
+            throw new IllegalStateException(String.format("%s posts not allowed", postType));
         }
-        post.setImages(null); //dunno if this is needed
+        Post post = mapFromRequestToPost(request);
+        post.setPostType(postType);
+        post.setUser(userService.getUserByEmail(userName));
+        //return post;
+        postRepository.save(post);
+
+        if (postType.equals("missing") || postType.equals("adoption") || postType.equals("stray")) {
+            post.setAnimalCharacteristics(mapFromRequestToAnimalCharacteristics(request, post));
+        }
+        else if (postType.equals("event")) {
+            post.setEventProperties(mapFromRequestToEventProperties(request, post));
+        }
+
+
+        /*
+        switch (postType) {
+            case "missing":
+            case "adoption":
+            case "stray":
+                post.setAnimalCharacteristics(mapFromDtoToAnimalCharacteristics(request));
+                break;
+            case "simple":
+                break;
+            case "event":
+                post.setEventProperties(mapFromDtoToEventProperties(request));
+                break;
+            default:
+                throw new IllegalStateException(String.format("%s posts not allowed", postType));
+        }
+        */
         return post;
     }
 
-    public void createNewSimplePost(PostDto postDto) {
-        Post post = mapFromDtoToSimplePost(postDto);
-
-        postRepository.save(fillTheDetails(post, postDto, "simple"));
-        for(Image postImage: post.getImages()) {
-            postImage.setPost(post);
-            imageRepository.save(postImage);
-        }
-        post.setImages(null);
-    }
-
-    public void createNewEventPost(PostDto postDto) {
-        Post post = mapFromDtoToEventPost(postDto);
-
-        postRepository.save(fillTheDetails(post, postDto, "event"));
-        for(Image postImage: post.getImages()) {
-            postImage.setPost(post);
-            imageRepository.save(postImage);
-        }
-        post.setImages(null);
-    }
-
-    public List<PostResponse> getAllPosts(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public List<PostResponse> getAllPosts(int pageNo, int pageSize, String sortBy, String sortDir, Specification<Post> specs) {
+        /*
         Sort sort;
         if (sortDir.equalsIgnoreCase("asc")) {
             sort = Sort.by(sortBy).ascending();
@@ -99,24 +93,107 @@ public class PostService {
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
         Page<Post> posts = postRepository.findAll(pageable);
-
+        */
+        List<Post> posts = postRepository.findAll(specs);
         return posts.stream().map(this::mapFromPostToResponse).collect(Collectors.toList());
     }
 
-    public List<PostResponse> findAll(Specification<Post> specs) {
-        List<Post> posts = postRepository.findAll(specs);
-        return posts.stream().map(this::mapFromPostToResponse).collect(Collectors.toList());
-        //return null;
+    public PostResponse getSinglePost(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() ->
+                new IllegalStateException(String.format("Post not found for ID:%s",postId)));
+        return mapFromPostToResponse(post);
+    }
+
+    public void updatePost(Long postId, String userName) {
+    }
+
+    public void willAttendEvent(Long postId, String userName) {
+        Post post = findById(postId);
+        if (!post.getPostType().equals("event")) {
+            throw new IllegalStateException("This is not an event");
+        }
+        User user = userService.getUserByEmail(userName);
+
+        if (post.getEventProperties().getEventAttendees().contains(user)) {
+            throw new IllegalStateException("Already answered");
+        }
+        post.getEventProperties().addEventAttendee(user);
+        postRepository.save(post);
+    }
+
+    public void deletePost(Long postId, String userName) {
+        //Post post = postRepository.findById(postId).orElseThrow(() ->
+        //        new IllegalStateException(String.format("Post not found for ID:%s", postId)));
+        Post post = findById(postId);
+
+        if (post.getUser().getEmail().equals(userName)) {
+            postRepository.delete(post);
+        }
+        else {
+            throw new IllegalStateException("You don't have permission to delete this post");
+        }
+    }
+
+    public Post findById(Long id) {
+        return postRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException("Post does not exits"));
+    }
+
+    public void addCommentator(Post post, User user) {
+        post.addCommentator(user);
+        postRepository.save(post);
+    }
+
+
+    private Post mapFromRequestToPost(PostRequest request) {
+        Post post = new Post();
+        post.setTitle(request.getTitle());
+        post.setImages(request.getImagesData());
+        post.setBody(request.getBody());
+        post.setEnableComments(request.getEnableComments());
+        if (request.getDate() != null) {
+            post.setDate(Date.valueOf(request.getDate()));
+        }
+        if (request.getLatitude() != null && request.getLongitude() != null) {
+            double latitude = Double.parseDouble(request.getLatitude());
+            double longitude = Double.parseDouble(request.getLongitude());
+            Geometry postLocation = locationService.postLocationToPoint(latitude, longitude);
+            post.setLocation(postLocation);
+        }
+        return  post;
+    }
+
+    private AnimalCharacteristics mapFromRequestToAnimalCharacteristics(PostRequest postDto, Post post) {
+        AnimalCharacteristics animalCharacteristics = new AnimalCharacteristics();
+        animalCharacteristics.setPost(post);
+        animalCharacteristics.setAnimalType(postDto.getAnimalType());
+        animalCharacteristics.setBreed(postDto.getBreed());
+        animalCharacteristics.setColor(String.join(",",postDto.getColors()));
+        animalCharacteristics.setGender(postDto.getGender());
+        animalCharacteristics.setSize(postDto.getSize());
+        animalCharacteristicsRepository.save(animalCharacteristics);
+        return animalCharacteristics;
+    }
+
+    private EventProperties mapFromRequestToEventProperties(PostRequest postDto, Post post) {
+        EventProperties eventProperties = new EventProperties();
+        eventProperties.setPost(post);
+        eventProperties.setAddress(postDto.getAddress());
+        eventProperties.setTime(Time.valueOf(postDto.getTime()));
+        eventPropertiesRepository.save(eventProperties);
+        return eventProperties;
     }
 
     private PostResponse mapFromPostToResponse(Post post) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
+
         PostResponse postResponse = new PostResponse();
         postResponse.setId(post.getId());
         postResponse.setUsername(post.getUser().getName());
         postResponse.setTitle(post.getTitle());
         postResponse.setBody(post.getBody());
         postResponse.setPostType(post.getPostType());
+
 
         if (postResponse.getPostType().equals("missing")) {
             postResponse.setAnimalType(post.getAnimalCharacteristics().getAnimalType());
@@ -126,24 +203,19 @@ public class PostService {
             postResponse.setSize(post.getAnimalCharacteristics().getSize());
             //postResponse.setMissingDate(((MissingPost) post).getMissingDate().toString());
         }
-        postResponse.setPostStatus(post.getPostStatus());
 
         //DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
         postResponse.setCreatedAt(post.getCreatedAt().format(dateTimeFormatter));
+        postResponse.setDate(post.getDate().toString());
         postResponse.setEnableComments(post.getEnableComments());
         //postResponse.setImages(post.getImages()); TODO convert image data to something that can be viewed
         //postResponse.setLocation(post.getLocation()); TODO convert lat,long to address - Geo mapper?
-        Geometry postLocation = post.getLocation();
-        Geometry userLocation = userRepository.findUserByEmail(userService.getCurrentUser()).getLocation();
-        double distance = locationHelper.getDistanceFromPostInMeters(userLocation, postLocation);
+        double distance = locationService.getDistanceFromPostInMeters(post.getUser().getLocation(), post.getLocation());
+
         if (distance == -1.0) {
             postResponse.setDistance("n/a");
-            //postRepository.setPostDistance(post.getId(), Double.MAX_VALUE);
-        }
-        else {
+        } else {
             postResponse.setDistance(String.format("%.2f", distance) + " meters");
-            //post.setDistance(distance);
-            //postRepository.setPostDistance(post.getId(), distance);
         }
         //postRepository.setPostDistance(post.getId(), null);
 
@@ -151,123 +223,5 @@ public class PostService {
 
         return postResponse;
 
-    }
-
-    private AnimalCharacteristics mapFromDtoToAnimalCharacteristics(PostDto postDto) {
-        AnimalCharacteristics animalCharacteristics = new AnimalCharacteristics();
-        animalCharacteristics.setAnimalType(postDto.getAnimalType());
-        animalCharacteristics.setBreed(postDto.getBreed());
-        //animalCharacteristics.setColor(Arrays.toString(postDto.getColors()));
-        animalCharacteristics.setColor(String.join(",",postDto.getColors()));
-        animalCharacteristics.setGender(postDto.getGender());
-        animalCharacteristics.setSize(postDto.getSize());
-        animalCharacteristicsRepository.save(animalCharacteristics);
-        return animalCharacteristics;
-    }
-
-    private Post fillTheDetails(Post post, PostDto postDto, String postType) {
-        //TODO create ImageService class to handle all image operations
-        List<Image> postImages = getPostImages(postDto);
-        post.setTitle(postDto.getTitle());
-        post.setImages(postImages);
-        post.setBody(postDto.getBody());
-        post.setPostType(postType);
-        post.setPostStatus(postDto.getPostStatus());
-        post.setEnableComments(postDto.getEnableComments());
-
-        if (postDto.getLatitude() != null && postDto.getLongitude() != null) {
-            Geometry postLocation = locationHelper.postLocationToPoint(Double.parseDouble(postDto.getLatitude()),
-                    Double.parseDouble(postDto.getLongitude()));
-            post.setLocation(postLocation);
-        }
-
-
-        post.setCreatedAt(LocalDateTime.now());
-        post.setUser(userRepository.findUserByEmail(userService.getCurrentUser()));
-        return post;
-    }
-
-    private ArrayList<Image> getPostImages(PostDto postDto) {
-        ArrayList<Image> postImages = new ArrayList<>();
-        for (Byte[] postImageData :postDto.getImagesData()) {
-            Image image = new Image();
-            image.setImageType("postImage");
-            image.setData(postImageData);
-            postImages.add(image);
-        }
-        return postImages;
-    }
-
-    /*
-    public PostDto readSinglePost(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException("For id " + id));
-        return mapFromPostToDto(post);
-    }
-    */
-
-
-    /*
-    private PostDto mapFromPostToDto(Post post) {
-        List<Image> postImages = imageRepository.findAllImagesByPostId(post.getId());
-        List<Byte[]> postImagesDto = new ArrayList<Byte[]>();
-        for (Image image: postImages) {
-            postImagesDto.add(image.getData());
-        }
-        PostDto postDto = new PostDto(post.getId(), post.getTitle(), postImagesDto, post.getBody(),
-                post.getPostType(), post.getPostStatus(), post.getUser().getId());
-        return postDto;
-    }
-    */
-
-
-    private Post mapFromDtoToAnimalPost(PostDto postDto, String postType) {
-        AnimalPost post;
-        switch (postType) {
-            case "missing":
-                post = new MissingPost();
-                ((MissingPost) post).setMissingDate(Date.valueOf(postDto.getMissingDate()));
-                ((MissingPost) post).setMissingMicrochipNumber(postDto.getMissingMicrochipNumber());
-                break;
-            case "adoption":
-                post = new AdoptionPost();
-                ((AdoptionPost) post).setAge(postDto.getAge());
-                ((AdoptionPost) post).setNeutered(postDto.getNeutered());
-                ((AdoptionPost) post).setAdoptionMicrochipNumber(postDto.getAdoptionMicrochipNumber());
-                ((AdoptionPost) post).setGoodWithChildren(postDto.getGoodWithChildren());
-                ((AdoptionPost) post).setGoodWithAnimals(postDto.getGoodWithAnimals());
-                break;
-            case "stray":
-                post = new StrayPost();
-                ((StrayPost) post).setStrayDate(Date.valueOf(postDto.getStrayDate()));
-                ((StrayPost) post).setActionsTaken(postDto.getActionsTaken());
-                break;
-            default:
-                throw new IllegalStateException("unknown postType");
-        }
-        post.setAnimalType(postDto.getAnimalType());
-        //post.setAnimalLocation(postDto.getAnimalLocation());
-        post.setBreed(postDto.getBreed());
-        post.setGender(postDto.getGender());
-        post.setColor(postDto.getColor());
-        post.setSize(postDto.getSize());
-
-        return post;
-
-    }
-
-    private Post mapFromDtoToSimplePost(PostDto postDto) {
-        SimplePost post = new SimplePost();
-        //post.setEnableDiscussion(postDto.getEnableDiscussion());
-        return post;
-    }
-
-    private Post mapFromDtoToEventPost(PostDto postDto) {
-        EventPost post = new EventPost();
-        post.setEventAddress(postDto.getEventAddress());
-        //post.setEventLocation(postDto.getEventLocation());
-        post.setEventDate(Date.valueOf(postDto.getEventDate()));
-        post.setEventTime(Time.valueOf(postDto.getEventTime()));
-        //post.setEnableEventDiscussion(postDto.getEnableEventDiscussion());
-        return post;
     }
 }
