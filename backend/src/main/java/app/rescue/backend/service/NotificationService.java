@@ -1,0 +1,187 @@
+package app.rescue.backend.service;
+
+import app.rescue.backend.model.*;
+import app.rescue.backend.payload.resposne.NotificationResponse;
+import app.rescue.backend.repository.NotificationRepository;
+import org.aspectj.weaver.ast.Not;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class NotificationService {
+
+    private final NotificationRepository notificationRepository;
+
+    private final UserService userService;
+    private final ConnectionService connectionService;
+
+    public NotificationService(NotificationRepository notificationRepository, UserService userService,
+                               ConnectionService connectionService) {
+        this.notificationRepository = notificationRepository;
+        this.userService = userService;
+        this.connectionService = connectionService;
+    }
+
+    public void sendConnectionRequestNotification(Connection connection) {
+        Notification connectionNotification = new Notification();
+        connectionNotification.setUser(userService.getUserById(connection.getConnectedToId()));
+        connectionNotification.setSenderId(connection.getUser().getId());
+        if (connection.getConnectionStatus().equals("PENDING")) {
+            connectionNotification.setText("New Friend Request");
+            connectionNotification.setNotificationType("CONNECTION-REQUEST");
+        }
+        else if (connection.getConnectionStatus().equals("FOLLOWER")) {
+            connectionNotification.setText("New Follower");
+            connectionNotification.setNotificationType("CONNECTION-FOLLOWER");
+        }
+
+
+        notificationRepository.save(connectionNotification);
+    }
+
+    public void sendConnectionAcceptedNotification(Connection connection) {
+        Notification connectionAcceptedNotification = new Notification();
+        connectionAcceptedNotification.setUser(userService.getUserById(connection.getConnectedToId()));
+        connectionAcceptedNotification.setSenderId(connection.getUser().getId());
+        connectionAcceptedNotification.setText(String.format("You are now friends with %s",connection.getUser().getName()));
+        connectionAcceptedNotification.setNotificationType("CONNECTION-ACCEPT");
+
+        notificationRepository.save(connectionAcceptedNotification);
+    }
+
+    public void sendInvitationCompletedNotification(User newUser) {
+        Notification connectionAcceptedNotification = new Notification();
+        User invitedByUser = userService.getUserById(newUser.getInvitedByUserId());
+        connectionAcceptedNotification.setUser(invitedByUser);
+        connectionAcceptedNotification.setSenderId(newUser.getId());
+        connectionAcceptedNotification.setText("Your friend created a Rescue account, " +
+                "when they enable their account you two will be automatically connected");
+        connectionAcceptedNotification.setNotificationType("REGISTRATION-INVITATION");
+        connectionAcceptedNotification.setCreatedAt(LocalDateTime.now());
+
+        notificationRepository.save(connectionAcceptedNotification);
+    }
+
+    public void sendNewPostNotification(Post post) {
+        Collection<User> notified = sendConnectionNotifications(post);
+        sendProximityNotifications(post, notified);
+    }
+
+    public void sendNewCommentNotification(Comment comment) {
+        if (!comment.getUser().equals(comment.getPost().getUser())) {
+            Notification newCommentNotification = new Notification();
+            newCommentNotification.setUser(comment.getPost().getUser());
+            newCommentNotification.setSenderId(comment.getUser().getId());
+            newCommentNotification.setPost(comment.getPost());
+            newCommentNotification.setText("There is a new comment on your post");
+            newCommentNotification.setNotificationType("COMMENT-OWNER");
+
+            notificationRepository.save(newCommentNotification);
+        }
+        sendAdditionalCommentNotifications(comment);
+    }
+
+    public List<NotificationResponse> getAllNotifications(String name) {
+        User user = userService.getUserByEmail(name);
+        List<Notification> notifications = notificationRepository.findAllByUser(user);
+        return notifications.stream().map(this::mapFromNotificationToResponse).collect(Collectors.toList());
+    }
+
+    public void readNotification(Long notificationId, String name) {
+        Notification notification = getNotificationById(notificationId);
+        if (notification.getUser().getEmail().equals(name)) {
+            notificationRepository.notificationRead(notification, LocalDateTime.now());
+        }
+        else {
+            throw new IllegalStateException("Not the owner of this notification");
+        }
+    }
+
+    public void deleteNotification(Long notificationId, String name) {
+        Notification notification = getNotificationById(notificationId);
+        if (notification.getUser().getEmail().equals(name)) {
+            notificationRepository.delete(notification);
+        }
+        else {
+            throw new IllegalStateException("Not the owner of this notification");
+        }
+    }
+
+    private Notification getNotificationById(Long id) {
+        return notificationRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(String.format("Notification with ID:%s does not exist", id)));
+    }
+
+    private Collection<User> sendConnectionNotifications(Post post) {
+        Collection<User> notified = new HashSet<>();
+        for (Connection connection : connectionService.findConnectionsByUser(post.getUser())) {
+            if (userService.tryToFindUserById(connection.getConnectedToId())) {
+                Notification newPostNotification = new Notification();
+                newPostNotification.setUser(userService.getUserById(connection.getConnectedToId()));
+                newPostNotification.setSenderId(connection.getUser().getId());
+                newPostNotification.setPost(post);
+                newPostNotification.setText("There is a new post from your connections");
+                newPostNotification.setNotificationType("POST-CONNECTIONS");
+
+                notificationRepository.save(newPostNotification);
+
+                notified.add(newPostNotification.getUser());
+            }
+        }
+        return notified;
+    }
+
+    private void sendProximityNotifications(Post post, Collection<User> notified) {
+        for (User user : userService.findAll()) {
+            if ((!notified.contains(user)) && (!user.equals(post.getUser())) &&
+                    (user.getLocation() != null) && (post.getLocation() != null)) {
+                if (user.getLocation().contains(post.getLocation())) {
+                    Notification newPostNotification = new Notification();
+                    newPostNotification.setUser(user);
+                    newPostNotification.setSenderId(post.getUser().getId());
+                    newPostNotification.setPost(post);
+                    newPostNotification.setText("There is a new post near you");
+                    newPostNotification.setNotificationType("POST-PROXIMITY");
+
+                    notificationRepository.save(newPostNotification);
+                }
+            }
+        }
+    }
+
+    private void sendAdditionalCommentNotifications(Comment comment) {
+        for (User commentator : comment.getPost().getCommentators()) {
+            if (!commentator.equals(comment.getUser())) {
+                Notification newCommentNotification = new Notification();
+                newCommentNotification.setUser(commentator);
+                newCommentNotification.setSenderId(comment.getUser().getId());
+                newCommentNotification.setPost(comment.getPost());
+                newCommentNotification.setText("There is a new comment on a post you also commented");
+                newCommentNotification.setNotificationType("COMMENT-COMMENTATOR");
+
+                notificationRepository.save(newCommentNotification);
+            }
+        }
+    }
+
+    private NotificationResponse mapFromNotificationToResponse(Notification notification) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
+
+        NotificationResponse notificationResponse = new NotificationResponse();
+        notificationResponse.setSender(userService.getUserById(notification.getSenderId()).getName());
+        if (notification.getPost() != null) {
+            notificationResponse.setPost(notification.getPost().getTitle());
+        }
+        notificationResponse.setText(notification.getText());
+        notificationResponse.setCreatedAt(notification.getCreatedAt().format(dateTimeFormatter));
+
+        return notificationResponse;
+    }
+}

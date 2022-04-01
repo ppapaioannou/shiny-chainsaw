@@ -1,33 +1,56 @@
 package app.rescue.backend.model;
 
 import javax.persistence.*;
-import java.util.UUID;
+import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comment")
 public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private UUID id;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Column(name = "text", nullable = false)
-    private String text;
+    @Column(name = "body", nullable = false)
+    private String body;
 
-    public String getText() {
-        return text;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setUpdatedAt(Date modifiedAt) {
+        this.updatedAt = modifiedAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public Post getPost() {
@@ -46,11 +69,11 @@ public class Comment {
         this.user = user;
     }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }

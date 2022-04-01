@@ -1,51 +1,53 @@
 package app.rescue.backend.model;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notification")
 public class Notification {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private UUID id;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
-    private User sender;
+    @Column(name = "sender_id")
+    private Long senderId;
 
-    @Column(name = "text")
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    @Column(name = "text", nullable = false)
     private String text;
 
-    @Column(name = "notification_type")
+    @Column(name = "notification_type", nullable = false)
     private String notificationType;
 
-    @Column(name = "created_at")
-    private Timestamp createdAt;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "read_at")
-    private Timestamp readAt;
+    private LocalDateTime readAt;
 
-    public Timestamp getReadAt() {
+    public LocalDateTime getReadAt() {
         return readAt;
     }
 
-    public void setReadAt(Timestamp readAt) {
+    public void setReadAt(LocalDateTime readAt) {
         this.readAt = readAt;
     }
 
-    public Timestamp getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp created_at) {
-        this.createdAt = created_at;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getNotificationType() {
@@ -64,12 +66,20 @@ public class Notification {
         this.text = text;
     }
 
-    public User getSender() {
-        return sender;
+    public Post getPost() {
+        return post;
     }
 
-    public void setSender(User sender) {
-        this.sender = sender;
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
+    public Long getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(Long senderId) {
+        this.senderId = senderId;
     }
 
     public User getUser() {
@@ -80,11 +90,11 @@ public class Notification {
         this.user = user;
     }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }
