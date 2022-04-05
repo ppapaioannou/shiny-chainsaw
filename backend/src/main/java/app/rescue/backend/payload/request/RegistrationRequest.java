@@ -6,25 +6,25 @@ import lombok.Data;
 @Data
 public class RegistrationRequest {
     //common fields
-    private final String email;
-    private final String password;
-    private final String name;
-    private final Byte[] profileImageData;
-    private final String phoneNumber;
-    private final String description;
+    private String email;
+    private String password;
+    private String name;
+    //private Byte[] profileImageData;
+    private String phoneNumber;
+    private String description;
 
     //individual fields
-    private final String lastName;
-    private final String dateOfBirth;
+    private String lastName;
+    //private final String dateOfBirth;
 
     //Organization fields
-    private final String contactEmail;
-    private final String region;
-    private final String address;
-    private final String city;
-    private final String zipCode;
-    private final String websiteUrl;
-    private final String facebookPageUrl;
-    private final String organizationNeeds;
+    private String contactEmail;
+    private String region;
+    private String address;
+    private String city;
+    private String zipCode;
+    private String websiteUrl;
+    private String facebookPageUrl;
+    private String organizationNeeds;
 
 }

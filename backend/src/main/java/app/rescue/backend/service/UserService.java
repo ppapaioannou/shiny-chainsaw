@@ -48,7 +48,7 @@ public class UserService implements UserDetailsService {
                 new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
     }
 
-    public String signUpUser(User newUser, String referralToken) {
+    public String signUpUser(User newUser) {
         Optional<User> userExists = userRepository.findByEmail(newUser.getEmail());
         if (userExists.isPresent()) {
             if (userExists.get().isEnabled()) {

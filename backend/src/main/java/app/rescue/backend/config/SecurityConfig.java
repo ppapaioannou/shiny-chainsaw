@@ -1,4 +1,4 @@
-package app.rescue.backend.security;
+package app.rescue.backend.config;
 
 import app.rescue.backend.service.UserService;
 import org.springframework.context.annotation.Bean;
@@ -12,12 +12,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public WebSecurityConfig(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public SecurityConfig(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
@@ -27,13 +27,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/v*/registration/**")
+                //.antMatchers("/api/v*/registration/**")
+                .antMatchers("/api/v*/auth/**")
                 .permitAll()
                 .anyRequest()
-                .authenticated()
-                .and()
+                .authenticated();
+                //.and()
                 //.formLogin();
-                .httpBasic();
+                //.httpBasic();
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class RegistrationService {
+public class AuthService {
 
     private final UserService userService;
     private final EmailValidator emailValidator;
@@ -18,9 +18,9 @@ public class RegistrationService {
     private final ConnectionService connectionService;
 
 
-    public RegistrationService(UserService userService, EmailValidator emailValidator,
-                               ConfirmationTokenService confirmationTokenService,
-                               EmailSender emailSender, ConnectionService connectionService) {
+    public AuthService(UserService userService, EmailValidator emailValidator,
+                       ConfirmationTokenService confirmationTokenService,
+                       EmailSender emailSender, ConnectionService connectionService) {
         this.userService = userService;
         this.emailValidator = emailValidator;
         this.confirmationTokenService = confirmationTokenService;
@@ -28,20 +28,20 @@ public class RegistrationService {
         this.connectionService = connectionService;
     }
 
-    public User register(RegistrationRequest requestDto, String userRole, String referralToken) {
-        boolean isValidEmail = emailValidator.check(requestDto.getEmail());
+    public User register(RegistrationRequest request, String userRole, String referralToken) {
+        boolean isValidEmail = emailValidator.check(request.getEmail());
 
         if (!isValidEmail) {
             throw new IllegalStateException("email not valid");
         }
-        User newUser = mapFromRequestToUser(requestDto, userRole);
+        User newUser = mapFromRequestToUser(request, userRole);
 
-        String token = userService.signUpUser(newUser, referralToken);
+        String token = userService.signUpUser(newUser);
 
         invitationRegistration(newUser, referralToken);
 
-        String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
-        emailSender.send(requestDto.getEmail(), buildEmail(requestDto.getName(), link));
+        String link = "http://localhost:8080/api/v1/auth/confirm?token=" + token;
+        emailSender.send(request.getEmail(), buildEmail(request.getName(), link));
 
         return newUser;
     }
@@ -68,33 +68,36 @@ public class RegistrationService {
     }
 
     //TODO create mapper class to handle this conversion
-    private User mapFromRequestToUser(RegistrationRequest requestDto, String userRole) {
+    private User mapFromRequestToUser(RegistrationRequest request, String userRole) {
         User user = new User();
-        user.setEmail(requestDto.getEmail());
-        user.setPassword(requestDto.getPassword());
-        user.setName(requestDto.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        String name = request.getName().substring(0, 1).toUpperCase() + request.getName().toLowerCase().substring(1);
+        user.setName(name);
 
-        user.setProfileImage(requestDto.getProfileImageData());
-        user.setPhoneNumber(requestDto.getPhoneNumber());
-        user.setDescription(requestDto.getDescription());
+
+        //user.setProfileImage(request.getProfileImageData());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setDescription(request.getDescription());
         user.setUserRole(Role.valueOf(userRole));
 
         if (userRole.equals("INDIVIDUAL")) {
             IndividualInformation individualInformation = new IndividualInformation();
-            individualInformation.setLastName(requestDto.getLastName());
-            //individualInformation.setDateOfBirth(Date.valueOf(requestDto.getDateOfBirth()));
+            String lastName = request.getLastName().substring(0, 1).toUpperCase() + request.getLastName().toLowerCase().substring(1);
+            individualInformation.setLastName(lastName);
+            //individualInformation.setDateOfBirth(Date.valueOf(request.getDateOfBirth()));
             user.setIndividualInformation(individualInformation);
         }
         else if (userRole.equals("ORGANIZATION")) {
             OrganizationInformation organizationInformation = new OrganizationInformation();
-            organizationInformation.setContactEmail(requestDto.getContactEmail());
-            organizationInformation.setRegion(requestDto.getRegion());
-            organizationInformation.setAddress(requestDto.getAddress());
-            organizationInformation.setCity(requestDto.getCity());
-            organizationInformation.setZipCode(requestDto.getZipCode());
-            organizationInformation.setWebsiteUrl(requestDto.getWebsiteUrl());
-            organizationInformation.setFacebookPageUrl(requestDto.getFacebookPageUrl());
-            organizationInformation.setOrganizationNeeds(requestDto.getOrganizationNeeds());
+            organizationInformation.setContactEmail(request.getContactEmail());
+            organizationInformation.setRegion(request.getRegion());
+            organizationInformation.setAddress(request.getAddress());
+            organizationInformation.setCity(request.getCity());
+            organizationInformation.setZipCode(request.getZipCode());
+            organizationInformation.setWebsiteUrl(request.getWebsiteUrl());
+            organizationInformation.setFacebookPageUrl(request.getFacebookPageUrl());
+            organizationInformation.setOrganizationNeeds(request.getOrganizationNeeds());
             user.setOrganizationInformation(organizationInformation);
         }
         else {

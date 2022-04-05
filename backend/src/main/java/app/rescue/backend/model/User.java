@@ -20,6 +20,7 @@ public class User implements UserDetails {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role userRole;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -71,9 +72,8 @@ public class User implements UserDetails {
     @Column(name = "community_standing", nullable = false)
     private Long communityStanding = 1L;
 
-    //@ManyToOne(cascade = CascadeType.PERSIST)
-    //@JoinColumn(name = "invited_by_id")
-    //private User invitedBy;
+    @Column(name = "invited_by_user_id")
+    private Long invitedByUserId;
 
     @Column(name = "referral_token", nullable = false)
     private String referralToken = UUID.randomUUID().toString();
@@ -87,17 +87,6 @@ public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private OrganizationInformation organizationInformation;
-
-    @Column(name = "invited_by_user_id")
-    private Long invitedByUserId;
-
-    public Long getInvitedByUserId() {
-        return invitedByUserId;
-    }
-
-    public void setInvitedByUserId(Long invitedByUserId) {
-        this.invitedByUserId = invitedByUserId;
-    }
 
     public OrganizationInformation getOrganizationInformation() {
         return organizationInformation;
@@ -130,15 +119,15 @@ public class User implements UserDetails {
     public void setReferralToken(String referralToken) {
         this.referralToken = referralToken;
     }
-    /*
-    public User getInvitedBy() {
-        return invitedBy;
+
+    public Long getInvitedByUserId() {
+        return invitedByUserId;
     }
 
-    public void setInvitedBy(User invitedBy) {
-        this.invitedBy = invitedBy;
+    public void setInvitedByUserId(Long invitedByUserId) {
+        this.invitedByUserId = invitedByUserId;
     }
-    */
+
     public Long getCommunityStanding() {
         return communityStanding;
     }

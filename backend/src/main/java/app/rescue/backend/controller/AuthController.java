@@ -4,7 +4,7 @@ import app.rescue.backend.model.User;
 import app.rescue.backend.payload.request.RegistrationRequest;
 //import app.rescue.backend.service.NotificationService;
 import app.rescue.backend.service.NotificationService;
-import app.rescue.backend.service.RegistrationService;
+import app.rescue.backend.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,24 +12,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Locale;
 
 @RestController
-@RequestMapping(path = "api/v1/registration")
-public class RegistrationController {
+@RequestMapping(path = "api/v1/auth")
+public class AuthController {
 
     //TODO resend confirmation mail
 
-    private final RegistrationService registrationService;
+    private final AuthService authService;
     private final NotificationService notificationService;
 
-    public RegistrationController(RegistrationService registrationService, NotificationService notificationService) {
-        this.registrationService = registrationService;
+    public AuthController(AuthService authService, NotificationService notificationService) {
+        this.authService = authService;
         this.notificationService = notificationService;
     }
 
 
-    @PostMapping(path = {"{userRole}", "/ref/{referralToken}/{userRole}"})
-    public ResponseEntity<String> register(@RequestBody RegistrationRequest registrationDto, @PathVariable String userRole,
+    @PostMapping(path = {"registration/{userRole}", "/ref/registration/{referralToken}/{userRole}"})
+    public ResponseEntity<String> register(@RequestBody RegistrationRequest request, @PathVariable String userRole,
                                            @PathVariable(required = false) String referralToken) {
-        User newUser = registrationService.register(registrationDto, userRole.toUpperCase(Locale.ROOT), referralToken);
+        User newUser = authService.register(request, userRole.toUpperCase(Locale.ROOT), referralToken);
         if (referralToken != null) {
 
             notificationService.sendInvitationCompletedNotification(newUser);
@@ -43,7 +43,7 @@ public class RegistrationController {
 
     @GetMapping(path = "confirm")
     public String confirm(@RequestParam("token") String token) {
-        return registrationService.confirmToken(token);
+        return authService.confirmToken(token);
     }
 
 }
