@@ -1,8 +1,9 @@
 package app.rescue.backend.controller;
 
 import app.rescue.backend.model.User;
+import app.rescue.backend.payload.request.LoginRequest;
 import app.rescue.backend.payload.request.RegistrationRequest;
-//import app.rescue.backend.service.NotificationService;
+import app.rescue.backend.payload.resposne.AuthenticationResponse;
 import app.rescue.backend.service.NotificationService;
 import app.rescue.backend.service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,11 @@ public class AuthController {
         //}
         return new ResponseEntity<>(HttpStatus.OK);
 
+    }
+
+    @PostMapping(path = "login")
+    public AuthenticationResponse login(@RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 
     @GetMapping(path = "confirm")

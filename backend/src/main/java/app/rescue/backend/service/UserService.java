@@ -1,51 +1,39 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
-//import app.rescue.backend.repository.ConnectionRepository;
 import app.rescue.backend.payload.request.UserLocationRequest;
 import app.rescue.backend.repository.IndividualInformationRepository;
 import app.rescue.backend.repository.OrganizationInformationRepository;
 import app.rescue.backend.repository.UserRepository;
 import com.vividsolutions.jts.geom.Geometry;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Optional;
 
 @Service
-public class UserService implements UserDetailsService {
-
-    private final static String USER_NOT_FOUND_MSG = "user with email %s not found";
+public class UserService {
 
     private final UserRepository userRepository;
     private final IndividualInformationRepository individualInformationRepository;
     private final OrganizationInformationRepository organizationInformationRepository;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     private final ConfirmationTokenService confirmationTokenService;
     private final LocationService locationService;
 
     public UserService(UserRepository userRepository, IndividualInformationRepository individualInformationRepository,
                        OrganizationInformationRepository organizationInformationRepository,
-                       BCryptPasswordEncoder bCryptPasswordEncoder,
+                       PasswordEncoder passwordEncoder,
                        ConfirmationTokenService confirmationTokenService, LocationService locationService) {
         this.userRepository = userRepository;
         this.individualInformationRepository = individualInformationRepository;
         this.organizationInformationRepository = organizationInformationRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.passwordEncoder = passwordEncoder;
         this.confirmationTokenService = confirmationTokenService;
         this.locationService = locationService;
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email).orElseThrow(() ->
-                new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, email)));
     }
 
     public String signUpUser(User newUser) {
@@ -57,7 +45,7 @@ public class UserService implements UserDetailsService {
             userRepository.delete(userExists.get());
         }
 
-        String encodedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
+        String encodedPassword = passwordEncoder.encode(newUser.getPassword());
         newUser.setPassword(encodedPassword);
 
         userRepository.save(newUser);
@@ -99,7 +87,7 @@ public class UserService implements UserDetailsService {
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
-                new IllegalStateException(String.format(USER_NOT_FOUND_MSG, email)));
+                new IllegalStateException(String.format("user with email %s not found", email)));
     }
 
     public User getUserById(Long id) {

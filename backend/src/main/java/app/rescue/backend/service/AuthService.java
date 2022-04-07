@@ -1,9 +1,16 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
+import app.rescue.backend.payload.request.LoginRequest;
 import app.rescue.backend.payload.request.RegistrationRequest;
+import app.rescue.backend.payload.resposne.AuthenticationResponse;
+import app.rescue.backend.security.JwtProvider;
 import app.rescue.backend.util.EmailSender;
 import app.rescue.backend.util.EmailValidator;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,16 +19,22 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
+
     private final EmailValidator emailValidator;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
     private final ConnectionService connectionService;
 
 
-    public AuthService(UserService userService, EmailValidator emailValidator,
+    public AuthService(UserService userService, AuthenticationManager authenticationManager,
+                       JwtProvider jwtProvider, EmailValidator emailValidator,
                        ConfirmationTokenService confirmationTokenService,
                        EmailSender emailSender, ConnectionService connectionService) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtProvider = jwtProvider;
         this.emailValidator = emailValidator;
         this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
@@ -65,6 +78,14 @@ public class AuthService {
 
         connectionService.completeRefConnection(confirmationToken.getUser());
         return "confirmed";
+    }
+
+    public AuthenticationResponse login(LoginRequest request) {
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String authenticationToken = jwtProvider.generateToken(authenticate);
+        return new AuthenticationResponse(authenticationToken, request.getEmail());
     }
 
     //TODO create mapper class to handle this conversion
