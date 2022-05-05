@@ -81,6 +81,9 @@ public class AuthService {
     }
 
     public AuthenticationResponse login(LoginRequest request) {
+        if (!userService.getUserByEmail(request.getEmail()).isEnabled()) {
+            throw new IllegalStateException("User is not enabled, check your emails");
+        }
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
@@ -95,9 +98,6 @@ public class AuthService {
         user.setPassword(request.getPassword());
         String name = request.getName().substring(0, 1).toUpperCase() + request.getName().toLowerCase().substring(1);
         user.setName(name);
-
-
-        //user.setProfileImage(request.getProfileImageData());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setDescription(request.getDescription());
         user.setUserRole(Role.valueOf(userRole));

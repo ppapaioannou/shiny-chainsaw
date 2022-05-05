@@ -61,7 +61,7 @@ public class User implements UserDetails {
 
     @Lob
     @Column(name = "profile_image")
-    private Byte[] profileImage;
+    private byte[] profileImage;
 
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -152,11 +152,11 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
     }
 
-    public Byte[] getProfileImage() {
+    public byte[] getProfileImage() {
         return profileImage;
     }
 
-    public void setProfileImage(Byte[] profileImage) {
+    public void setProfileImage(byte[] profileImage) {
         this.profileImage = profileImage;
     }
 

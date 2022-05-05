@@ -1,19 +1,26 @@
-package app.rescue.backend.payload.request;
+package app.rescue.backend.payload;
 
+import app.rescue.backend.model.Image;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
+import java.util.List;
 
 @Data
-public class PostRequest {
+public class PostDto {
+    private Long id;
+    private String username;
+    private String postType;
+    private String createdAt;
+    private String distance;
+
     //post fields
     private String title;
-    //private Collection<Byte[]> imagesData;
-    //private MultipartFile[] imagesData;
     private String body;
     private Boolean enableComments;
     private String date;
+    private String thumbnail;
+    private String address;
     private String latitude;
     private String longitude;
 
@@ -32,5 +39,5 @@ public class PostRequest {
 
     //event properties
     private String time;
-    private String address;
+    //private String address;
 }

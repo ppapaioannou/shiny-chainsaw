@@ -78,7 +78,7 @@ public class CommentService {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
         CommentResponse commentResponse = new CommentResponse();
-        commentResponse.setName(comment.getUser().getName());
+        commentResponse.setUsername(comment.getUser().getName() + " " + comment.getUser().getIndividualInformation().getLastName());
         commentResponse.setPostId(String.valueOf(comment.getPost().getId()));
         commentResponse.setBody(comment.getBody());
         commentResponse.setCreatedAt(comment.getCreatedAt().format(dateTimeFormatter));

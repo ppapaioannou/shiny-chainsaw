@@ -24,7 +24,10 @@ public class Post {
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
+    private Collection<Image> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Comment> comments = new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinTable(name = "commentators", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "users_id"))
@@ -40,6 +43,7 @@ public class Post {
     private String title;
 
     @Column(name = "body")
+    @Lob
     private String body;
 
     @Column(name = "post_type", nullable = false)
@@ -64,19 +68,38 @@ public class Post {
     @Column(name = "location")
     private Geometry location;
 
-    @Lob
-    @ElementCollection
-    @Column(name = "image")
-    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
-    private Collection<Byte[]> images = new ArrayList<>();
+    @Column(name = "address")
+    private String address;
 
-    public Collection<Byte[]> getImages() {
-        return images;
+    public String getAddress() {
+        return address;
     }
 
-    public void setImages(Collection<Byte[]> images) {
-        this.images = images;
+    public void setAddress(String address) {
+        this.address = address;
     }
+
+    public void setComments(Collection<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public Collection<Comment> getComments() {
+        return comments;
+    }
+
+    //@Lob
+    //@ElementCollection
+    //@Column(name = "image")
+    //@CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
+    //private byte[] image;
+
+    //public byte[] getImages() {
+    //    return image;
+    //}
+
+    //public void setImages(byte[] image) {
+    //    this.image = image;
+    //}
 
     public Geometry getLocation() {
         return location;
@@ -179,12 +202,12 @@ public class Post {
         this.commentators = commentators;
     }
 
-    public List<Comment> getComments() {
-        return comments;
+    public Collection<Image> getImages() {
+        return images;
     }
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
+    public void setImages(Collection<Image> images) {
+        this.images = images;
     }
 
     public User getUser() {

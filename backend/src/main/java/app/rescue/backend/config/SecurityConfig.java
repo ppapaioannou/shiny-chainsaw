@@ -5,6 +5,7 @@ import app.rescue.backend.security.JwtProvider;
 import app.rescue.backend.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -43,10 +44,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity
                 .csrf().disable()
                 .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**")
+                .permitAll()
                 .antMatchers("/api/v*/auth/**")
                 .permitAll()
-                //.antMatchers("/api/v*/posts/all", "/api/v*/posts/get/**")
-                //.permitAll()
+                .antMatchers("/api/v*/posts/all", "/api/v*/posts/view/**")
+                .permitAll()
+                .antMatchers("/api/v*/images/**")
+                .permitAll()
                 .anyRequest()
                 .authenticated();
 
