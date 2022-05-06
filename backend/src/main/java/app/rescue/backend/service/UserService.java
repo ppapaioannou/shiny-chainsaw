@@ -1,6 +1,7 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
+import app.rescue.backend.payload.LocationDto;
 import app.rescue.backend.payload.request.UserLocationRequest;
 import app.rescue.backend.repository.IndividualInformationRepository;
 import app.rescue.backend.repository.OrganizationInformationRepository;
@@ -66,13 +67,20 @@ public class UserService {
         userRepository.enableUser(email);
     }
 
-    public void updateUserLocation(UserLocationRequest request, String userName) {
+    public void updateUserLocation(LocationDto request, String userName) {
         User user = getUserByEmail(userName);
         Geometry userLocation = null;
         if (request.getLatitude() != null && request.getLongitude() != null) {
             double latitude = Double.parseDouble(request.getLatitude());
             double longitude = Double.parseDouble(request.getLongitude());
-            double diameterInMeters = Double.parseDouble(request.getDiameterInMeters());
+            double diameterInMeters;
+            if (request.getDiameterInMeters().equals("inf")) {
+                diameterInMeters = Double.MAX_VALUE;
+            }
+            else {
+                diameterInMeters = Double.parseDouble(request.getDiameterInMeters());
+            }
+
             userLocation = locationService.userLocationToCircle(latitude, longitude, diameterInMeters);
         }
         user.setLocation(userLocation);

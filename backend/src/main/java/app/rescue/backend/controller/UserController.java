@@ -1,5 +1,6 @@
 package app.rescue.backend.controller;
 
+import app.rescue.backend.payload.LocationDto;
 import app.rescue.backend.payload.request.UserLocationRequest;
 import app.rescue.backend.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ public class UserController {
     }
 
     @PutMapping(path = "update-location")
-    public ResponseEntity<String> updateUserLocation(@RequestBody UserLocationRequest request, Principal principal) {
+    public ResponseEntity<String> updateUserLocation(@RequestBody LocationDto request, Principal principal) {
         userService.updateUserLocation(request, principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
