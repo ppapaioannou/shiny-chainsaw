@@ -1,7 +1,9 @@
 package app.rescue.backend.controller;
 
 import app.rescue.backend.payload.LocationDto;
+import app.rescue.backend.payload.UserDto;
 import app.rescue.backend.payload.request.UserLocationRequest;
+import app.rescue.backend.payload.resposne.UserResponse;
 import app.rescue.backend.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,11 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping(path = "{userId}")
+    public ResponseEntity<UserDto> getSingleUser(@PathVariable String userId) {
+        return new ResponseEntity<>(userService.getSingleUser(Long.valueOf(userId)), HttpStatus.OK);
     }
 
     @PutMapping(path = "update-location")

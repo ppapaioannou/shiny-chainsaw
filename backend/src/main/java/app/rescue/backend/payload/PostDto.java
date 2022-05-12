@@ -10,6 +10,7 @@ import java.util.List;
 public class PostDto {
     private Long id;
     private String username;
+    private String userId;
     private String postType;
     private String createdAt;
     private String distance;

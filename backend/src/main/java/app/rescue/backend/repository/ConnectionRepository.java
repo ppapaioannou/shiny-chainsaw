@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,4 +33,15 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     void completeRefOrgConnection(User user);
 
     Collection<Connection> findConnectionsByUser(User user);
+
+    @Query("SELECT c FROM Connection c WHERE c.connectedToId = ?1 AND c.connectionStatus = 'PENDING'")
+    List<Connection> findAllFriendRequests(Long userId);
+
+    @Query("SELECT c FROM Connection c WHERE c.connectedToId = ?1 AND c.connectionStatus = 'CONNECTED'")
+    List<Connection> findAllFriends(Long userId);
+
+    @Query("SELECT c FROM Connection c WHERE c.user = ?1 AND c.connectionStatus = 'FOLLOWER'")
+    List<Connection> findAllOrganizations(User user);
+
+    Boolean existsByUserAndConnectedToId(User user, Long connectedToId);
 }

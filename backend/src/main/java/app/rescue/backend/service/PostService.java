@@ -112,8 +112,9 @@ public class PostService {
     }
 
     public PostDto getSinglePost(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() ->
-                new IllegalStateException(String.format("Post not found for ID:%s",postId)));
+        //Post post = postRepository.findById(postId).orElseThrow(() ->
+        //        new IllegalStateException(String.format("Post not found for ID:%s",postId)));
+        Post post = findById(postId);
         return mapFromPostToResponse(post);
     }
 
@@ -208,7 +209,9 @@ public class PostService {
 
         PostDto postResponse = new PostDto();
         postResponse.setId(post.getId());
-        postResponse.setUsername(post.getUser().getName() + " " + post.getUser().getIndividualInformation().getLastName());
+        //postResponse.setUsername(post.getUser().getName() + " " + post.getUser().getIndividualInformation().getLastName());
+        postResponse.setUsername(post.getUser().getName());
+        postResponse.setUserId(post.getUser().getId().toString());
         postResponse.setTitle(post.getTitle());
         postResponse.setBody(post.getBody());
         postResponse.setPostType(post.getPostType());

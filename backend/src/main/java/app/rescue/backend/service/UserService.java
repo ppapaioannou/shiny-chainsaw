@@ -2,7 +2,9 @@ package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
 import app.rescue.backend.payload.LocationDto;
+import app.rescue.backend.payload.UserDto;
 import app.rescue.backend.payload.request.UserLocationRequest;
+import app.rescue.backend.payload.resposne.UserResponse;
 import app.rescue.backend.repository.IndividualInformationRepository;
 import app.rescue.backend.repository.OrganizationInformationRepository;
 import app.rescue.backend.repository.UserRepository;
@@ -126,7 +128,29 @@ public class UserService {
 
 
 
+    public UserDto getSingleUser(Long userId) {
+        User user = findById(userId);
+        return mapFromUserToResponse(user);
+    }
 
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException("User does not exits"));
+    }
+
+    private UserDto mapFromUserToResponse(User user) {
+        UserDto response = new UserDto();
+        response.setId(user.getId().toString());
+        response.setName(user.getName());
+
+        if (user.getUserRole().equals(Role.INDIVIDUAL)) {
+            response.setLastName(user.getIndividualInformation().getLastName());
+        }
+        response.setAccountType(user.getUserRole().name());
+        response.setEmail(user.getEmail());
+
+        return response;
+    }
 
 
 /*
@@ -145,16 +169,7 @@ public class UserService {
         return users.stream().map(this::mapFromUserToResponse).collect(Collectors.toList());
     }
 
-    public UserResponse getSingleUser(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isPresent()) {
-            return mapFromUserToResponse(user.get());
-        }
-        else {
-            throw new IllegalStateException("User does not exist.");
-        }
 
-    }
 */
     /*
     public void updateUserInfo(RegistrationDto userUpdate, Long userId) {
@@ -197,22 +212,6 @@ public class UserService {
         //String email = getCurrentUserEmail();
         User user = userRepository.findUserByEmail(getCurrentUserEmail());
         userRepository.delete(user);
-    }
-*/
-
-
-/*
-    private UserResponse mapFromUserToResponse(User user) {
-        UserResponse userResponse = new UserResponse();
-        userResponse.setName(user.getName());
-        if (user.getUserRole().equals(Role.INDIVIDUAL)) {
-            userResponse.setLastName(((Individual) user).getLastName());
-        }
-        //else if (user.getUserRole().equals(Role.ORGANIZATION)) {
-            //userResponse.setLastName("");
-        //}
-
-        return userResponse;
     }
 */
 }
