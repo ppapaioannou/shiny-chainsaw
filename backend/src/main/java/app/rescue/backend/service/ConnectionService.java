@@ -73,7 +73,6 @@ public class ConnectionService {
     public List<UserDto>  getAllOrganizations(String userName) {
         User user = userService.getUserByEmail(userName);
         List<Connection> organizations = connectionRepository.findAllOrganizations(user);
-        System.out.println(organizations.size());
         return organizations.stream().map(this::mapFromConnectionToResponse).collect(Collectors.toList());
     }
 

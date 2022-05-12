@@ -1,5 +1,6 @@
 package app.rescue.backend.controller;
 
+import app.rescue.backend.payload.NotificationDto;
 import app.rescue.backend.payload.resposne.NotificationResponse;
 import app.rescue.backend.service.NotificationService;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,7 +22,7 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationResponse>> getAllNotifications(Principal principal) {
+    public ResponseEntity<List<NotificationDto>> getAllNotifications(Principal principal) {
         return new ResponseEntity<>(notificationService.getAllNotifications(principal.getName()), HttpStatus.OK);
     }
 

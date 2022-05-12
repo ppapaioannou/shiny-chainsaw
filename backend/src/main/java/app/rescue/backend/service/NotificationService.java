@@ -1,6 +1,7 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
+import app.rescue.backend.payload.NotificationDto;
 import app.rescue.backend.payload.resposne.NotificationResponse;
 import app.rescue.backend.repository.NotificationRepository;
 import org.aspectj.weaver.ast.Not;
@@ -88,7 +89,7 @@ public class NotificationService {
         sendAdditionalCommentNotifications(comment);
     }
 
-    public List<NotificationResponse> getAllNotifications(String name) {
+    public List<NotificationDto> getAllNotifications(String name) {
         User user = userService.getUserByEmail(name);
         List<Notification> notifications = notificationRepository.findAllByUser(user);
         return notifications.stream().map(this::mapFromNotificationToResponse).collect(Collectors.toList());
@@ -171,10 +172,11 @@ public class NotificationService {
         }
     }
 
-    private NotificationResponse mapFromNotificationToResponse(Notification notification) {
+    private NotificationDto mapFromNotificationToResponse(Notification notification) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
-        NotificationResponse notificationResponse = new NotificationResponse();
+        NotificationDto notificationResponse = new NotificationDto();
+        notificationResponse.setId(notification.getId().toString());
         notificationResponse.setSender(userService.getUserById(notification.getSenderId()).getName());
         if (notification.getPost() != null) {
             notificationResponse.setPost(notification.getPost().getTitle());
