@@ -124,10 +124,6 @@ public class UserService {
         return confirmationToken;
     }
 
-
-
-
-
     public UserDto getSingleUser(Long userId) {
         User user = findById(userId);
         return mapFromUserToResponse(user);

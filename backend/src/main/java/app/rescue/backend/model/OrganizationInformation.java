@@ -36,6 +36,7 @@ public class OrganizationInformation {
     private String facebookPageUrl;
 
     @Column(name = "organization_needs")
+    @Lob
     private String organizationNeeds;
 
     public String getOrganizationNeeds() {

@@ -23,10 +23,9 @@ public class RegistrationRequest {
 
     //Organization fields
     private String contactEmail;
-    private String region;
+    private String latitude;
+    private String longitude;
     private String address;
-    private String city;
-    private String zipCode;
     private String websiteUrl;
     private String facebookPageUrl;
     private String organizationNeeds;

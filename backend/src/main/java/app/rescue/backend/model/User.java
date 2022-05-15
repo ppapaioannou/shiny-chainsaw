@@ -59,14 +59,11 @@ public class User implements UserDetails {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Lob
-    @Column(name = "profile_image")
-    private byte[] profileImage;
-
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "desription")
+    @Column(name = "description")
+    @Lob
     private String description;
 
     @Column(name = "community_standing", nullable = false)
@@ -150,14 +147,6 @@ public class User implements UserDetails {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-    }
-
-    public byte[] getProfileImage() {
-        return profileImage;
-    }
-
-    public void setProfileImage(byte[] profileImage) {
-        this.profileImage = profileImage;
     }
 
     public String getName() {

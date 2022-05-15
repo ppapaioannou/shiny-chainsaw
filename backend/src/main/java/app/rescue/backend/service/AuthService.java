@@ -7,6 +7,7 @@ import app.rescue.backend.payload.resposne.AuthenticationResponse;
 import app.rescue.backend.security.JwtProvider;
 import app.rescue.backend.util.EmailSender;
 import app.rescue.backend.util.EmailValidator;
+import com.vividsolutions.jts.geom.Geometry;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,11 +28,13 @@ public class AuthService {
     private final EmailSender emailSender;
     private final ConnectionService connectionService;
 
+    private final LocationService locationService;
+
 
     public AuthService(UserService userService, AuthenticationManager authenticationManager,
                        JwtProvider jwtProvider, EmailValidator emailValidator,
                        ConfirmationTokenService confirmationTokenService,
-                       EmailSender emailSender, ConnectionService connectionService) {
+                       EmailSender emailSender, ConnectionService connectionService, LocationService locationService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
@@ -39,6 +42,7 @@ public class AuthService {
         this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
         this.connectionService = connectionService;
+        this.locationService = locationService;
     }
 
     public User register(RegistrationRequest request, String userRole, String referralToken) {
@@ -112,10 +116,15 @@ public class AuthService {
         else if (userRole.equals("ORGANIZATION")) {
             OrganizationInformation organizationInformation = new OrganizationInformation();
             organizationInformation.setContactEmail(request.getContactEmail());
-            organizationInformation.setRegion(request.getRegion());
+            //organizationInformation.setRegion(request.getRegion());
+            //TODO CLEAN THIS UP
             organizationInformation.setAddress(request.getAddress());
-            organizationInformation.setCity(request.getCity());
-            organizationInformation.setZipCode(request.getZipCode());
+            double latitude = Double.parseDouble(request.getLatitude());
+            double longitude = Double.parseDouble(request.getLongitude());
+            Geometry orgLocation = locationService.postLocationToPoint(latitude, longitude);
+            user.setLocation(orgLocation);
+            //organizationInformation.setCity(request.getCity());
+            //organizationInformation.setZipCode(request.getZipCode());
             organizationInformation.setWebsiteUrl(request.getWebsiteUrl());
             organizationInformation.setFacebookPageUrl(request.getFacebookPageUrl());
             organizationInformation.setOrganizationNeeds(request.getOrganizationNeeds());

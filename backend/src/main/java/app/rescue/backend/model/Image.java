@@ -1,5 +1,6 @@
 package app.rescue.backend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -13,8 +14,12 @@ public class Image {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "post_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @Column(name = "name")
@@ -54,6 +59,13 @@ public class Image {
         this.data = data;
     }
 
+    public Image(User user, String name, String type, byte[] data) {
+        this.user = user;
+        this.name = name;
+        this.type = type;
+        this.data = data;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -64,6 +76,14 @@ public class Image {
 
     public void setPost(Post post) {
         this.post = post;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Long getId() {
