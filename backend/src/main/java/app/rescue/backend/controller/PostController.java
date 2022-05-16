@@ -55,14 +55,14 @@ public class PostController {
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
-            @SearchSpec Specification<Post> specs) {
+            @SearchSpec Specification<Post> specs, Principal principal) {
         return new ResponseEntity<>(postService.getAllPosts(pageNo, pageSize, sortBy, sortDir,
-                Specification.where(specs)), HttpStatus.OK);
+                Specification.where(specs), principal.getName()), HttpStatus.OK);
     }
 
     @GetMapping(path = "view/{postId}")
-    public ResponseEntity<PostDto> getSinglePost(@PathVariable Long postId) {
-        return new ResponseEntity<>(postService.getSinglePost(postId), HttpStatus.OK);
+    public ResponseEntity<PostDto> getSinglePost(@PathVariable Long postId, Principal principal) {
+        return new ResponseEntity<>(postService.getSinglePost(postId, principal.getName()), HttpStatus.OK);
     }
 
     @PutMapping(path = "edit/{postId}")

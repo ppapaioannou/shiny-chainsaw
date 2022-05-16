@@ -89,7 +89,8 @@ public class PostService {
         return post;
     }
 
-    public List<PostDto> getAllPosts(int pageNo, int pageSize, String sortBy, String sortDir, Specification<Post> specs) {
+    public List<PostDto> getAllPosts(int pageNo, int pageSize, String sortBy, String sortDir,
+                                     Specification<Post> specs, String userName) {
 
         Sort sort;
         if (sortDir.equalsIgnoreCase("asc")) {
@@ -108,14 +109,19 @@ public class PostService {
         //Page<Post> posts = postRepository.findAll(pageable);
 
         List<Post> posts = postRepository.findAll(specs);
-        return posts.stream().map(this::mapFromPostToResponse).collect(Collectors.toList());
+        User user = userService.getUserByEmail(userName);
+
+        //mapFromPostToResponse(posts, user);
+        //return posts.stream().map(this::mapFromPostToResponse).collect(Collectors.toList());
+        return posts.stream().map(post -> mapFromPostToResponse(post, user)).collect(Collectors.toList());
     }
 
-    public PostDto getSinglePost(Long postId) {
+    public PostDto getSinglePost(Long postId, String userName) {
         //Post post = postRepository.findById(postId).orElseThrow(() ->
         //        new IllegalStateException(String.format("Post not found for ID:%s",postId)));
         Post post = findById(postId);
-        return mapFromPostToResponse(post);
+        User user = userService.getUserByEmail(userName);
+        return mapFromPostToResponse(post, user);
     }
 
     public void updatePost(Long postId, String userName) {
@@ -203,7 +209,7 @@ public class PostService {
         return eventProperties;
     }
 
-    private PostDto mapFromPostToResponse(Post post) {
+    private PostDto mapFromPostToResponse(Post post, User user) {
         DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -249,7 +255,7 @@ public class PostService {
         //postResponse.setImages(post.getImages()); TODO convert image data to something that can be viewed
         //postResponse.setLocation(post.getLocation()); TODO convert lat,long to address - Geo mapper?
         postResponse.setAddress(post.getAddress());
-        double distance = locationService.getDistanceFromPostInMeters(post.getUser().getLocation(), post.getLocation());
+        double distance = locationService.getDistanceFromPostInMeters(user.getLocation(), post.getLocation());
 
         if (distance == -1.0) {
             postResponse.setDistance("n/a");
