@@ -13,7 +13,7 @@ public class PostDto {
     private String userId;
     private String postType;
     private String createdAt;
-    private String distance;
+    private Double distance;
 
     //post fields
     private String title;
@@ -36,9 +36,10 @@ public class PostDto {
     private Boolean neutered;
     private Boolean goodWithAnimals;
     private Boolean goodWithChildren;
-    private String actionsTaken;
+    private String actionTaken;
 
     //event properties
     private String time;
+    private String eventAttendees;
     //private String address;
 }

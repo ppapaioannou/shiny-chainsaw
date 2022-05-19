@@ -50,8 +50,7 @@ public class LocationService {
         //return String.valueOf(distance);
     }
 
-    public boolean checkProximity(Geometry userLocation, Double notificationRadius, Geometry postLocation) {
-        //if (userLocation.getCentroid().c)
-        return false;
+    public boolean proximityCheck(Geometry userLocation, Geometry postLocation) {
+        return userLocation.contains(postLocation);
     }
 }

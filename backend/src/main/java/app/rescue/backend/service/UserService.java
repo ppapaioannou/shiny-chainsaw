@@ -77,7 +77,8 @@ public class UserService {
             double longitude = Double.parseDouble(request.getLongitude());
             double diameterInMeters;
             if (request.getDiameterInMeters().equals("inf")) {
-                diameterInMeters = Double.MAX_VALUE;
+                //earth diameter in meters
+                diameterInMeters = 12742000.0;
             }
             else {
                 diameterInMeters = Double.parseDouble(request.getDiameterInMeters());
