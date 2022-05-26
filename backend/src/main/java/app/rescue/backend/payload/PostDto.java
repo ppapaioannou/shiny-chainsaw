@@ -14,6 +14,7 @@ public class PostDto {
     private String postType;
     private String createdAt;
     private Double distance;
+    private int NumberOfComments;
 
     //post fields
     private String title;

@@ -60,7 +60,18 @@ public class ImageService {
                 throw new IllegalStateException("Not an user role.");
             }
         }
+        image.setProfileImage(true);
         imageRepository.save(image);
+
+    }
+
+    public void updateProfileImage(User user, MultipartFile file) throws IOException {
+        if (file != null) {
+            Image currentImage = imageRepository.findByUserAndProfileImage(user, true);
+            imageRepository.delete(currentImage);
+            storeProfileImage(user, file);
+        }
+
 
     }
 

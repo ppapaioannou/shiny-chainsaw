@@ -32,6 +32,17 @@ public class Image {
     @Column(name = "data")
     private byte[] data;
 
+    @Column(name = "profile_image", nullable = false)
+    private Boolean profileImage = false;
+
+    public Boolean getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(Boolean profileImage) {
+        this.profileImage = profileImage;
+    }
+
     public byte[] getData() {
         return data;
     }

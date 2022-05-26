@@ -1,13 +1,12 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.model.Connection;
-import app.rescue.backend.model.Post;
-import app.rescue.backend.model.Role;
-import app.rescue.backend.model.User;
-import app.rescue.backend.payload.ConnectionDto;
+import app.rescue.backend.model.*;
 import app.rescue.backend.payload.UserDto;
 import app.rescue.backend.repository.ConnectionRepository;
+import app.rescue.backend.repository.ImageRepository;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,9 +20,12 @@ public class ConnectionService {
 
     private final UserService userService;
 
-    public ConnectionService(ConnectionRepository connectionRepository, UserService userService) {
+    private final ImageRepository imageRepository;
+
+    public ConnectionService(ConnectionRepository connectionRepository, UserService userService, ImageRepository imageRepository) {
         this.connectionRepository = connectionRepository;
         this.userService = userService;
+        this.imageRepository = imageRepository;
     }
 
     public Connection connectWith(Long userId, String userName) {
@@ -59,23 +61,29 @@ public class ConnectionService {
         return connection;
     }
     
-    public List<UserDto>  getAllFriendRequests(String userName) {
+    public List<UserDto> getAllFriendRequests(String userName) {
         User user = userService.getUserByEmail(userName);
         List<Connection> friendRequests = connectionRepository.findAllFriendRequests(user.getId());
         return friendRequests.stream().map(this::mapFromConnectionToResponse).collect(Collectors.toList());
     }
 
-    public List<UserDto>  getAllFriends(String userName) {
+    public List<UserDto> getAllFriends(String userName) {
         User user = userService.getUserByEmail(userName);
         List<Connection> friends = connectionRepository.findAllFriends(user.getId());
         return friends.stream().map(this::mapFromConnectionToResponse).collect(Collectors.toList());
     }
-    public List<UserDto>  getAllOrganizations(String userName) {
+
+    public List<UserDto> getAllOrganizations(String userName) {
         User user = userService.getUserByEmail(userName);
         List<Connection> organizations = connectionRepository.findAllOrganizations(user);
         return organizations.stream().map(this::mapFromConnectionToResponse).collect(Collectors.toList());
     }
 
+    public List<UserDto> getAllFollowers(String userName) {
+        User user = userService.getUserByEmail(userName);
+        List<Connection> followers = connectionRepository.findAllFollowers(user.getId());
+        return followers.stream().map(this::mapFromFollowerToResponse).collect(Collectors.toList());
+    }
 
     public Boolean  isConnectedTo(Long connectedToId, String userName) {
         User user = userService.getUserByEmail(userName);
@@ -160,19 +168,79 @@ public class ConnectionService {
     private UserDto mapFromConnectionToResponse(Connection connection) {
         UserDto response = new UserDto();
         User user = userService.getUserById(connection.getUser().getId());
+
+        Image profileImage;
         User connectedToUser = userService.getUserById(connection.getConnectedToId());
         if (connectedToUser.getUserRole().equals(Role.INDIVIDUAL)) {
             response.setId(user.getId().toString());
             response.setName(user.getName());
             response.setLastName(user.getIndividualInformation().getLastName());
+            profileImage = imageRepository.findByUserAndProfileImage(user, true);
         }
         else if (connectedToUser.getUserRole().equals(Role.ORGANIZATION)) {
             response.setId(connectedToUser.getId().toString());
             response.setName(connectedToUser.getName());
+            profileImage = imageRepository.findByUserAndProfileImage(connectedToUser, true);
         }
+        else {
+            throw new IllegalStateException("connection profile Image error");
+        }
+
+
+        //Image profileImage = imageRepository.findByUserAndProfileImage(user, true);
+        String profileImageLink = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/api/v1/images/image/")
+                .path(String.valueOf(profileImage.getId()))
+                .toUriString();
+        response.setProfileImage(profileImageLink);
 
 
 
         return response;
     }
+    //TODO THIS NEEDS TO BE BETTER
+
+    private UserDto mapFromFollowerToResponse(Connection connection) {
+        UserDto response = new UserDto();
+        //User organization = userService.getUserById(connection.getConnectedToId());
+
+        User follower = userService.getUserById(connection.getUser().getId());
+
+        response.setId(follower.getId().toString());
+        response.setName(follower.getName());
+        response.setLastName(follower.getIndividualInformation().getLastName());
+        Image profileImage = imageRepository.findByUserAndProfileImage(follower, true);
+        /*
+
+        if (follower.getUserRole().equals(Role.INDIVIDUAL)) {
+            response.setId(follower.getId().toString());
+            response.setName(follower.getName());
+            response.setLastName(follower.getIndividualInformation().getLastName());
+            profileImage = imageRepository.findByUserAndProfileImage(follower, true);
+        }
+        else if (follower.getUserRole().equals(Role.ORGANIZATION)) {
+            response.setId(follower.getId().toString());
+            response.setName(follower.getName());
+            profileImage = imageRepository.findByUserAndProfileImage(follower, true);
+        }
+        else {
+            throw new IllegalStateException("connection profile Image error");
+        }
+        */
+
+
+        //Image profileImage = imageRepository.findByUserAndProfileImage(user, true);
+        String profileImageLink = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/api/v1/images/image/")
+                .path(String.valueOf(profileImage.getId()))
+                .toUriString();
+        response.setProfileImage(profileImageLink);
+
+
+
+        return response;
+    }
+
 }

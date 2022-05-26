@@ -4,10 +4,24 @@ import lombok.Data;
 
 @Data
 public class UserDto {
+    //common
     private String id;
     private String name;
-    private String lastName;
-
     private String accountType;
     private String email;
+    private String profileImage;
+    private String phoneNumber;
+    private String description;
+    private String communityStanding;
+
+    //individual
+    private String lastName;
+    private String dateOfBirth;
+
+
+    //organization
+    private String contactEmail;
+    private String websiteUrl;
+    private String facebookPageUrl;
+    private String organizationNeeds;
 }

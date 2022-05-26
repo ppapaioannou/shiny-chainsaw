@@ -9,4 +9,5 @@ public class NotificationDto {
     private String post;
     private String text;
     private String createdAt;
+    private String readAt;
 }

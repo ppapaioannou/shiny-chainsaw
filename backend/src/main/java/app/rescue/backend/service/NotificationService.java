@@ -2,9 +2,7 @@ package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
 import app.rescue.backend.payload.NotificationDto;
-import app.rescue.backend.payload.resposne.NotificationResponse;
 import app.rescue.backend.repository.NotificationRepository;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,7 +10,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,7 +88,7 @@ public class NotificationService {
 
     public List<NotificationDto> getAllNotifications(String name) {
         User user = userService.getUserByEmail(name);
-        List<Notification> notifications = notificationRepository.findAllByUser(user);
+        List<Notification> notifications = notificationRepository.findAllByUserOrderByCreatedAtDesc(user);
         return notifications.stream().map(this::mapFromNotificationToResponse).collect(Collectors.toList());
     }
 
@@ -183,6 +180,10 @@ public class NotificationService {
         }
         notificationResponse.setText(notification.getText());
         notificationResponse.setCreatedAt(notification.getCreatedAt().format(dateTimeFormatter));
+        if (notification.getReadAt() != null) {
+            notificationResponse.setReadAt(notification.getReadAt().format(dateTimeFormatter));
+        }
+
 
         return notificationResponse;
     }

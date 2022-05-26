@@ -235,6 +235,7 @@ public class PostService {
         postResponse.setTitle(post.getTitle());
         postResponse.setBody(post.getBody());
         postResponse.setPostType(post.getPostType());
+        postResponse.setNumberOfComments(post.getComments().size());
 
         if (!post.getPostType().equals("simple")) {
             postResponse.setDate(post.getDate().toLocalDate().format(dateFormatter));

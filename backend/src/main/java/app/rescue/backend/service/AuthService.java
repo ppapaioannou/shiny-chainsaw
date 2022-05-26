@@ -58,7 +58,7 @@ public class AuthService {
         invitationRegistration(newUser, referralToken);
 
         String link = "http://localhost:8080/api/v1/auth/confirm?token=" + token;
-        emailSender.send(request.getEmail(), buildEmail(request.getName(), link));
+        emailSender.send(request.getEmail(), buildEmail(request.getName(), link), false);
 
         return newUser;
     }
@@ -92,7 +92,8 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         String authenticationToken = jwtProvider.generateToken(authenticate);
-        return new AuthenticationResponse(authenticationToken, request.getEmail());
+        User user = userService.getUserByEmail(request.getEmail());
+        return new AuthenticationResponse(authenticationToken, request.getEmail(), user.getId(), user.getUserRole().toString());
     }
 
     //TODO create mapper class to handle this conversion
@@ -121,7 +122,7 @@ public class AuthService {
             organizationInformation.setAddress(request.getAddress());
             double latitude = Double.parseDouble(request.getLatitude());
             double longitude = Double.parseDouble(request.getLongitude());
-            Geometry orgLocation = locationService.postLocationToPoint(latitude, longitude);
+            Geometry orgLocation = locationService.userLocationToCircle(latitude, longitude, 40000);
             user.setLocation(orgLocation);
             //organizationInformation.setCity(request.getCity());
             //organizationInformation.setZipCode(request.getZipCode());

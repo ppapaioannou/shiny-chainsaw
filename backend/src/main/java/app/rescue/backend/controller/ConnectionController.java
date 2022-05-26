@@ -49,6 +49,11 @@ public class ConnectionController {
         return new ResponseEntity<>(connectionService.getAllOrganizations(principal.getName()), HttpStatus.OK);
     }
 
+    @GetMapping(path="followers")
+    public ResponseEntity<List<UserDto>> getAllFollowers(Principal principal) {
+        return new ResponseEntity<>(connectionService.getAllFollowers(principal.getName()), HttpStatus.OK);
+    }
+
     @GetMapping(path="is-connected-to/{connectedToId}")
     public ResponseEntity<Boolean> getAllFriends(@PathVariable Long connectedToId, Principal principal) {
         return new ResponseEntity<>(connectionService.isConnectedTo(connectedToId, principal.getName()), HttpStatus.OK);

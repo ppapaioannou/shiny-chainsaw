@@ -43,5 +43,8 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     @Query("SELECT c FROM Connection c WHERE c.user = ?1 AND c.connectionStatus = 'FOLLOWER'")
     List<Connection> findAllOrganizations(User user);
 
+    @Query("SELECT c FROM Connection c WHERE c.connectedToId = ?1 AND c.connectionStatus = 'FOLLOWER'")
+    List<Connection> findAllFollowers(Long userId);
+
     Boolean existsByUserAndConnectedToId(User user, Long connectedToId);
 }

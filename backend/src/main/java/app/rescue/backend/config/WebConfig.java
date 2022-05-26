@@ -2,6 +2,7 @@ package app.rescue.backend.config;
 
 import app.rescue.backend.util.StringToPostDtoConverter;
 import app.rescue.backend.util.StringToRegistrationRequestConverter;
+import app.rescue.backend.util.StringToUserDtoConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -29,6 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
         ObjectMapper mapper = new ObjectMapper();
         registry.addConverter(new StringToPostDtoConverter(mapper));
         registry.addConverter(new StringToRegistrationRequestConverter(mapper));
+        registry.addConverter(new StringToUserDtoConverter(mapper));
     }
 
 
