@@ -1,6 +1,5 @@
 package app.rescue.backend.model;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;

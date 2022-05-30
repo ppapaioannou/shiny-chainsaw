@@ -1,9 +1,9 @@
 package app.rescue.backend.controller;
 
 import app.rescue.backend.model.User;
-import app.rescue.backend.payload.request.LoginRequest;
-import app.rescue.backend.payload.request.RegistrationRequest;
-import app.rescue.backend.payload.resposne.AuthenticationResponse;
+import app.rescue.backend.payload.RegistrationDto;
+import app.rescue.backend.payload.LoginDto;
+import app.rescue.backend.payload.AuthenticationDto;
 import app.rescue.backend.service.ImageService;
 import app.rescue.backend.service.NotificationService;
 import app.rescue.backend.service.AuthService;
@@ -19,8 +19,6 @@ import java.util.Locale;
 @RequestMapping(path = "api/v1/auth")
 public class AuthController {
 
-    //TODO resend confirmation mail
-
     private final AuthService authService;
     private final NotificationService notificationService;
     private final ImageService imageService;
@@ -32,28 +30,26 @@ public class AuthController {
     }
 
 
-    @PostMapping(path = {"registration/{userRole}", "/ref/registration/{referralToken}/{userRole}"})
-    public ResponseEntity<String> register(@RequestParam("request") RegistrationRequest request,
+    @PostMapping(path = {"register/{userRole}", "/ref/register/{referralToken}/{userRole}"})
+    public ResponseEntity<String> register(@RequestParam("payload") RegistrationDto request,
                                            @RequestParam(value = "file", required = false) MultipartFile profileImage,
                                            @PathVariable String userRole,
                                            @PathVariable(required = false) String referralToken) throws IOException {
-        User newUser = authService.register(request, userRole.toUpperCase(Locale.ROOT), referralToken);
+        User newUser = authService.register(request, userRole.toUpperCase(Locale.ROOT));
 
-        //if (profileImage != null) {
         imageService.storeProfileImage(newUser, profileImage);
-        //}
+
         if (referralToken != null) {
+            authService.invitationRegistration(newUser, referralToken);
             notificationService.sendInvitationCompletedNotification(newUser);
         }
-        //if (newUser.getUserRole().equals(Role.ORGANIZATION)) {
-        //    //TODO send proximity notification about new organization near
-        //}
+
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
     @PostMapping(path = "login")
-    public AuthenticationResponse login(@RequestBody LoginRequest request) {
+    public AuthenticationDto login(@RequestBody LoginDto request) {
         return authService.login(request);
     }
 

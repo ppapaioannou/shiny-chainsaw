@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 @Table(name = "connection")
 @NoArgsConstructor
 public class Connection {
-    //TODO user - connectedToUserId
-    //this way if a connected user deletes their account then the connection remains
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

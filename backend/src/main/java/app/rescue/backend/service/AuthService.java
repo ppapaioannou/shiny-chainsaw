@@ -1,9 +1,9 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
-import app.rescue.backend.payload.request.LoginRequest;
-import app.rescue.backend.payload.request.RegistrationRequest;
-import app.rescue.backend.payload.resposne.AuthenticationResponse;
+import app.rescue.backend.payload.RegistrationDto;
+import app.rescue.backend.payload.LoginDto;
+import app.rescue.backend.payload.AuthenticationDto;
 import app.rescue.backend.security.JwtProvider;
 import app.rescue.backend.util.EmailSender;
 import app.rescue.backend.util.EmailValidator;
@@ -20,32 +20,33 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final UserService userService;
+
+    private final ConfirmationTokenService confirmationTokenService;
+    private final ConnectionService connectionService;
+    private final LocationService locationService;
+
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
 
     private final EmailValidator emailValidator;
-    private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
-    private final ConnectionService connectionService;
-
-    private final LocationService locationService;
 
 
-    public AuthService(UserService userService, AuthenticationManager authenticationManager,
-                       JwtProvider jwtProvider, EmailValidator emailValidator,
-                       ConfirmationTokenService confirmationTokenService,
-                       EmailSender emailSender, ConnectionService connectionService, LocationService locationService) {
+    public AuthService(UserService userService, ConfirmationTokenService confirmationTokenService,
+                       ConnectionService connectionService, LocationService locationService,
+                       AuthenticationManager authenticationManager, JwtProvider jwtProvider,
+                       EmailValidator emailValidator, EmailSender emailSender) {
         this.userService = userService;
+        this.confirmationTokenService = confirmationTokenService;
+        this.connectionService = connectionService;
+        this.locationService = locationService;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.emailValidator = emailValidator;
-        this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
-        this.connectionService = connectionService;
-        this.locationService = locationService;
     }
 
-    public User register(RegistrationRequest request, String userRole, String referralToken) {
+    public User register(RegistrationDto request, String userRole) {
         boolean isValidEmail = emailValidator.check(request.getEmail());
 
         if (!isValidEmail) {
@@ -55,12 +56,28 @@ public class AuthService {
 
         String token = userService.signUpUser(newUser);
 
-        invitationRegistration(newUser, referralToken);
-
-        String link = "http://localhost:8080/api/v1/auth/confirm?token=" + token;
-        emailSender.send(request.getEmail(), buildEmail(request.getName(), link), false);
+        String confirmationLink = "http://localhost:8080/api/v1/auth/confirm?token=" + token;
+        emailSender.send(request.getEmail(), request.getName(), confirmationLink);
 
         return newUser;
+    }
+
+    public void invitationRegistration(User newUser, String referralToken) {
+        User invitedByUser = userService.findByReferralToken(referralToken);
+        newUser.setInvitedByUserId(invitedByUser.getId());
+        connectionService.invitationRegistration(newUser, invitedByUser);
+    }
+
+    public AuthenticationDto login(LoginDto request) {
+        if (!userService.getUserByEmail(request.getEmail()).isEnabled()) {
+            throw new IllegalStateException("User is not enabled, check your emails");
+        }
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String authenticationToken = jwtProvider.generateToken(authenticate);
+        User user = userService.getUserByEmail(request.getEmail());
+        return new AuthenticationDto(authenticationToken, request.getEmail(), user.getId(), user.getUserRole().toString());
     }
 
     public String confirmToken(String token) {
@@ -84,48 +101,34 @@ public class AuthService {
         return "confirmed";
     }
 
-    public AuthenticationResponse login(LoginRequest request) {
-        if (!userService.getUserByEmail(request.getEmail()).isEnabled()) {
-            throw new IllegalStateException("User is not enabled, check your emails");
-        }
-        Authentication authenticate = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authenticate);
-        String authenticationToken = jwtProvider.generateToken(authenticate);
-        User user = userService.getUserByEmail(request.getEmail());
-        return new AuthenticationResponse(authenticationToken, request.getEmail(), user.getId(), user.getUserRole().toString());
-    }
-
-    //TODO create mapper class to handle this conversion
-    private User mapFromRequestToUser(RegistrationRequest request, String userRole) {
+    private User mapFromRequestToUser(RegistrationDto request, String userRole) {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
-        String name = request.getName().substring(0, 1).toUpperCase() + request.getName().toLowerCase().substring(1);
-        user.setName(name);
+        user.setName(request.getName());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setDescription(request.getDescription());
         user.setUserRole(Role.valueOf(userRole));
 
         if (userRole.equals("INDIVIDUAL")) {
             IndividualInformation individualInformation = new IndividualInformation();
-            String lastName = request.getLastName().substring(0, 1).toUpperCase() + request.getLastName().toLowerCase().substring(1);
-            individualInformation.setLastName(lastName);
-            //individualInformation.setDateOfBirth(Date.valueOf(request.getDateOfBirth()));
+            individualInformation.setLastName(request.getLastName());
             user.setIndividualInformation(individualInformation);
         }
         else if (userRole.equals("ORGANIZATION")) {
             OrganizationInformation organizationInformation = new OrganizationInformation();
             organizationInformation.setContactEmail(request.getContactEmail());
-            //organizationInformation.setRegion(request.getRegion());
-            //TODO CLEAN THIS UP
-            organizationInformation.setAddress(request.getAddress());
-            double latitude = Double.parseDouble(request.getLatitude());
-            double longitude = Double.parseDouble(request.getLongitude());
-            Geometry orgLocation = locationService.userLocationToCircle(latitude, longitude, 40000);
-            user.setLocation(orgLocation);
-            //organizationInformation.setCity(request.getCity());
-            //organizationInformation.setZipCode(request.getZipCode());
+
+            if (!request.getAddress().equals("")) {
+                //only if location is set, otherwise parseDouble trows error
+                organizationInformation.setAddress(request.getAddress());
+                double latitude = Double.parseDouble(request.getLatitude());
+                double longitude = Double.parseDouble(request.getLongitude());
+                double diameterInMeters = 40000;
+                Geometry orgLocation = locationService.userLocationToCircle(latitude, longitude, diameterInMeters);
+                user.setLocation(orgLocation);
+            }
+
             organizationInformation.setWebsiteUrl(request.getWebsiteUrl());
             organizationInformation.setFacebookPageUrl(request.getFacebookPageUrl());
             organizationInformation.setOrganizationNeeds(request.getOrganizationNeeds());
@@ -138,82 +141,6 @@ public class AuthService {
         return user;
     }
 
-    private void invitationRegistration(User user, String referralToken) {
-        if (referralToken != null) {
-            User invitedByUser = userService.findByReferralToken(referralToken);
-            user.setInvitedByUserId(invitedByUser.getId());
-            connectionService.invitationRegistration(user, invitedByUser);
 
-        }
-    }
-
-    private String buildEmail(String name, String link) {
-        return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
-                "\n" +
-                "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>\n" +
-                "\n" +
-                "  <table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td width=\"100%\" height=\"53\" bgcolor=\"#0b0c0c\">\n" +
-                "        \n" +
-                "        <table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;max-width:580px\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\">\n" +
-                "          <tbody><tr>\n" +
-                "            <td width=\"70\" bgcolor=\"#0b0c0c\" valign=\"middle\">\n" +
-                "                <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">\n" +
-                "                  <tbody><tr>\n" +
-                "                    <td style=\"padding-left:10px\">\n" +
-                "                  \n" +
-                "                    </td>\n" +
-                "                    <td style=\"font-size:28px;line-height:1.315789474;Margin-top:4px;padding-left:10px\">\n" +
-                "                      <span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Confirm your email</span>\n" +
-                "                    </td>\n" +
-                "                  </tr>\n" +
-                "                </tbody></table>\n" +
-                "              </a>\n" +
-                "            </td>\n" +
-                "          </tr>\n" +
-                "        </tbody></table>\n" +
-                "        \n" +
-                "      </td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table>\n" +
-                "  <table role=\"presentation\" class=\"m_-6186904992287805515content\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td width=\"10\" height=\"10\" valign=\"middle\"></td>\n" +
-                "      <td>\n" +
-                "        \n" +
-                "                <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">\n" +
-                "                  <tbody><tr>\n" +
-                "                    <td bgcolor=\"#1D70B8\" width=\"100%\" height=\"10\"></td>\n" +
-                "                  </tr>\n" +
-                "                </tbody></table>\n" +
-                "        \n" +
-                "      </td>\n" +
-                "      <td width=\"10\" valign=\"middle\" height=\"10\"></td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table>\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "  <table role=\"presentation\" class=\"m_-6186904992287805515content\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td height=\"30\"><br></td>\n" +
-                "    </tr>\n" +
-                "    <tr>\n" +
-                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
-                "      <td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">\n" +
-                "        \n" +
-                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Thank you for registering. Please click on the below link to activate your account: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\"" + link + "\">Activate Now</a> </p></blockquote>\n Link will expire in 15 minutes. <p>See you soon</p>" +
-                "        \n" +
-                "      </td>\n" +
-                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
-                "    </tr>\n" +
-                "    <tr>\n" +
-                "      <td height=\"30\"><br></td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table><div class=\"yj6qo\"></div><div class=\"adL\">\n" +
-                "\n" +
-                "</div></div>";
-    }
 }
 

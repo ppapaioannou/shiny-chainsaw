@@ -1,11 +1,14 @@
 package app.rescue.backend.model;
 
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comment")
+@NoArgsConstructor
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +31,12 @@ public class Comment {
 
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    public Comment(User user, Post post, String body) {
+        this.user = user;
+        this.post = post;
+        this.body = body;
+    }
 
     public Date getUpdatedAt() {
         return updatedAt;

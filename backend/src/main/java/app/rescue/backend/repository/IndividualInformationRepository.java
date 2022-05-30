@@ -1,7 +1,6 @@
 package app.rescue.backend.repository;
 
 import app.rescue.backend.model.IndividualInformation;
-import app.rescue.backend.model.OrganizationInformation;
 import app.rescue.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

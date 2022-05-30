@@ -23,18 +23,7 @@ public class EventProperties {
 
     @Column(name = "time", nullable = false)
     private Time time;
-/*
-    @Column(name = "address")
-    private String address;
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-*/
     public Time getTime() {
         return time;
     }

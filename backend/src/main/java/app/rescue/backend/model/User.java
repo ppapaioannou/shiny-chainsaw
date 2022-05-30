@@ -27,6 +27,9 @@ public class User implements UserDetails {
     private Collection<ConfirmationToken> confirmationTokens = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Image> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -42,7 +45,7 @@ public class User implements UserDetails {
     private Collection<Connection> connections = new ArrayList<>();
 
     @ManyToMany(mappedBy = "eventAttendees", cascade = CascadeType.ALL)
-    private Collection<EventProperties> eventProperties = new ArrayList<>();
+    private Collection<EventProperties> eventsAttended = new ArrayList<>();
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -204,12 +207,12 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    public Collection<EventProperties> getEventProperties() {
-        return eventProperties;
+    public Collection<EventProperties> getEventsAttended() {
+        return eventsAttended;
     }
 
-    public void setEventProperties(Collection<EventProperties> eventProperties) {
-        this.eventProperties = eventProperties;
+    public void setEventsAttended(Collection<EventProperties> eventProperties) {
+        this.eventsAttended = eventProperties;
     }
 
     public void setConnections(Collection<Connection> connections) {
@@ -250,6 +253,14 @@ public class User implements UserDetails {
 
     public Collection<Post> getPosts() {
         return posts;
+    }
+
+    public Collection<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(Collection<Image> images) {
+        this.images = images;
     }
 
     public Collection<ConfirmationToken> getConfirmationTokens() {

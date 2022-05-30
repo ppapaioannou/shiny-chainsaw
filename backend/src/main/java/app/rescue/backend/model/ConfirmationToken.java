@@ -20,13 +20,13 @@ public class ConfirmationToken {
     private User user;
 
     @Column(name = "token", nullable = false, unique = true)
-    private String token = UUID.randomUUID().toString();;
+    private String token = UUID.randomUUID().toString();
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "expires_at", nullable = false)
-    private LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(15);;
+    private LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(15);
 
     @Column(name = "confirmed_at")
     private LocalDateTime confirmedAt;

@@ -1,8 +1,7 @@
 package app.rescue.backend.controller;
 
 import app.rescue.backend.model.Comment;
-import app.rescue.backend.payload.request.CommentRequest;
-import app.rescue.backend.payload.resposne.CommentResponse;
+import app.rescue.backend.payload.CommentDto;
 import app.rescue.backend.service.CommentService;
 import app.rescue.backend.service.NotificationService;
 import org.springframework.http.HttpStatus;
@@ -24,27 +23,21 @@ public class CommentController {
         this.notificationService = notificationService;
     }
 
-    @PostMapping(path = "add/{postId}")
-    public ResponseEntity<String> createNewComment(@RequestBody CommentRequest request,
-                                                   @PathVariable Long postId, Principal principal) {
-        Comment comment = commentService.createNewComment(request, postId, principal.getName());
+    @PostMapping()
+    public ResponseEntity<String> addNewComment(@RequestBody CommentDto request, Principal principal) {
+        Comment comment = commentService.addNewComment(request, principal.getName());
         notificationService.sendNewCommentNotification(comment);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("post-comments/{postId}")
-    public ResponseEntity<List<CommentResponse>> getAllPostComments(@PathVariable Long postId) {
+    @GetMapping("post/{postId}/all")
+    public ResponseEntity<List<CommentDto>> getAllPostComments(@PathVariable Long postId) {
         return new ResponseEntity<>(commentService.getAllPostComments(postId), HttpStatus.OK);
     }
 
-    @PutMapping(path = "{commentId}")
-    public ResponseEntity<String> updateComment(@PathVariable Long commentId, Principal principal) {
-        commentService.updateComment();
-        //notificationService.sendNewCommentNotification(comment);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    //TODO @PutMapping(path = "edit/{commentId}") editComment(@PathVariable Long commentId, Principal principal)
 
-    @DeleteMapping(path = {"delete/{commentId}"})
+    @DeleteMapping(path = {"{commentId}/delete"})
     public ResponseEntity<String> deleteComment(@PathVariable Long commentId, Principal principal) {
         commentService.deleteComment(commentId, principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);

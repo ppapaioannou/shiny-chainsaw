@@ -12,14 +12,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.sql.Date;
 import java.sql.Time;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,29 +31,29 @@ public class PostService {
 
     private final UserService userService;
     private final LocationService locationService;
-    //private final ImageService imageService;
+    private final ImageService imageService;
 
     //private final ImageController imageController;
 
     public PostService(PostRepository postRepository, AnimalCharacteristicsRepository animalCharacteristicsRepository,
                        EventPropertiesRepository eventPropertiesRepository, UserService userService,
-                       LocationService locationService) {
+                       LocationService locationService, ImageService imageService) {
         this.postRepository = postRepository;
         this.animalCharacteristicsRepository = animalCharacteristicsRepository;
         this.eventPropertiesRepository = eventPropertiesRepository;
         this.userService = userService;
         this.locationService = locationService;
+        this.imageService = imageService;
     }
 
 
-    public Post createNewPost(PostDto request, String postType, String userName) {
+    public Post createNewPost(PostDto request, String postType, String username) {
         if (!postTypes.contains(postType)) {
             throw new IllegalStateException(String.format("%s posts not allowed", postType));
         }
         Post post = mapFromRequestToPost(request);
         post.setPostType(postType);
-        post.setUser(userService.getUserByEmail(userName));
-        //return post;
+        post.setUser(userService.getUserByEmail(username));
         postRepository.save(post);
 
         if (postType.equals("missing") || postType.equals("adoption") || postType.equals("stray")) {
@@ -64,30 +62,11 @@ public class PostService {
         else if (postType.equals("event")) {
             post.setEventProperties(mapFromRequestToEventProperties(request, post));
         }
-
-
-        /*
-        switch (postType) {
-            case "missing":
-            case "adoption":
-            case "stray":
-                post.setAnimalCharacteristics(mapFromDtoToAnimalCharacteristics(request));
-                break;
-            case "simple":
-                break;
-            case "event":
-                post.setEventProperties(mapFromDtoToEventProperties(request));
-                break;
-            default:
-                throw new IllegalStateException(String.format("%s posts not allowed", postType));
-        }
-        */
         return post;
     }
 
     public List<PostDto> getAllPosts(int pageNo, int pageSize, String sortBy, String sortDir,
-                                     Specification<Post> specs, String userName) {
-
+                                     Specification<Post> specs, String username) {
         Sort sort;
         if (sortDir.equalsIgnoreCase("asc")) {
             sort = Sort.by(sortBy).ascending();
@@ -103,37 +82,15 @@ public class PostService {
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
         Page<Post> posts = postRepository.findAll(specs, pageable);
-
-        if (!userName.isEmpty()) {
-            User user = userService.getUserByEmail(userName);
-            return posts.stream().map(post -> mapFromPostToResponse(post, user)).collect(Collectors.toList());
-        }
-        else {
-            return posts.stream().map(post -> mapFromPostToResponse(post, null)).collect(Collectors.toList());
-        }
-
-        //mapFromPostToResponse(posts, user);
-        //return posts.stream().map(this::mapFromPostToResponse).collect(Collectors.toList());
-
+        return posts.stream().map(post -> mapFromPostToResponse(post, username)).collect(Collectors.toList());
     }
 
-    public PostDto getSinglePost(Long postId, String userName) {
-        //Post post = postRepository.findById(postId).orElseThrow(() ->
-        //        new IllegalStateException(String.format("Post not found for ID:%s",postId)));
+    public PostDto getSinglePost(Long postId, String username) {
         Post post = findById(postId);
-        if (!userName.isEmpty()) {
-            User user = userService.getUserByEmail(userName);
-            return mapFromPostToResponse(post, user);
-        }
-        else {
-            return mapFromPostToResponse(post, null);
-        }
-
-
+        return mapFromPostToResponse(post, username);
     }
 
-    public void updatePost(Long postId, String userName) {
-    }
+    //TODO public void editPost()
 
     public void willAttendEvent(Long postId, String userName) {
         Post post = findById(postId);
@@ -149,11 +106,10 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public void deletePost(Long postId, String userName) {
-        //Post post = postRepository.findById(postId).orElseThrow(() ->
-        //        new IllegalStateException(String.format("Post not found for ID:%s", postId)));
-        Post post = findById(postId);
+    //TODO public void willNotAttendEvent
 
+    public void deletePost(Long postId, String userName) {
+        Post post = findById(postId);
         if (post.getUser().getEmail().equals(userName)) {
             postRepository.delete(post);
         }
@@ -176,12 +132,8 @@ public class PostService {
     private Post mapFromRequestToPost(PostDto request) {
         Post post = new Post();
         post.setTitle(request.getTitle());
-        //post.setImages(request.getImagesData());
         post.setBody(request.getBody());
-        if (request.getEnableComments() != null) {
-            post.setEnableComments(request.getEnableComments());
-        }
-        if (!Objects.equals(request.getDate(), "")) {
+        if (request.getDate() != null) {
             post.setDate(Date.valueOf(request.getDate()));
         }
         if (!request.getLatitude().isEmpty() && !request.getLongitude().isEmpty()) {
@@ -189,7 +141,6 @@ public class PostService {
             double longitude = Double.parseDouble(request.getLongitude());
             Geometry postLocation = locationService.postLocationToPoint(latitude, longitude);
             post.setLocation(postLocation);
-
             post.setAddress(request.getAddress());
         }
         return  post;
@@ -216,30 +167,28 @@ public class PostService {
     private EventProperties mapFromRequestToEventProperties(PostDto postDto, Post post) {
         EventProperties eventProperties = new EventProperties();
         eventProperties.setPost(post);
-        //eventProperties.setAddress(postDto.getAddress());
         eventProperties.setTime(Time.valueOf(postDto.getTime()));
-        //eventProperties.setTime(Time.valueOf(postDto.getTime()));
         eventPropertiesRepository.save(eventProperties);
         return eventProperties;
     }
 
-    private PostDto mapFromPostToResponse(Post post, User user) {
+    private PostDto mapFromPostToResponse(Post post, String username) {
         DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         PostDto postResponse = new PostDto();
         postResponse.setId(post.getId());
-        //postResponse.setUsername(post.getUser().getName() + " " + post.getUser().getIndividualInformation().getLastName());
-        postResponse.setUsername(post.getUser().getName());
+        String userName = post.getUser().getName();
+        if (post.getUser().getIndividualInformation() != null) {
+            userName += " " + post.getUser().getIndividualInformation().getLastName();
+        }
+        postResponse.setUserName(userName);
         postResponse.setUserId(post.getUser().getId().toString());
         postResponse.setTitle(post.getTitle());
         postResponse.setBody(post.getBody());
+        postResponse.setDate(post.getDate().toLocalDate().format(dateFormatter));
         postResponse.setPostType(post.getPostType());
         postResponse.setNumberOfComments(post.getComments().size());
-
-        if (!post.getPostType().equals("simple")) {
-            postResponse.setDate(post.getDate().toLocalDate().format(dateFormatter));
-        }
 
         if (post.getAnimalCharacteristics() != null) {
             postResponse.setAnimalType(post.getAnimalCharacteristics().getAnimalType());
@@ -260,35 +209,19 @@ public class PostService {
             postResponse.setEventAttendees(String.valueOf(post.getEventProperties().getEventAttendees().size()));
         }
         postResponse.setCreatedAt(post.getCreatedAt().format(timestampFormatter));
-        postResponse.setEnableComments(post.getEnableComments());
+
         Collection<Image> postImages = post.getImages();
         if (postImages.iterator().hasNext()) {
-            Long imageId = postImages.iterator().next().getId();
-            String thumbnailLink = ServletUriComponentsBuilder
-                    .fromCurrentContextPath()
-                    .path("/api/v1/images/image/")
-                    .path(String.valueOf(imageId))
-                    .toUriString();
-            postResponse.setThumbnail(thumbnailLink);
+            Image image = postImages.iterator().next();
+            postResponse.setThumbnail(imageService.createFileDownloadUri(image));
         }
-        //postResponse.setThumbnail(imageService.getPostThumbnail(post));
-        //postResponse.setThumbnail(imageService.getImage());
-        //System.out.println(imageService.);
-        //ResponseEntity<byte[]> request = imageController.getImage(imageService.getPostThumbnail(post).getId());
-        //request.getD
-        //System.out.println(imageController.getImage(imageService.getPostThumbnail(post).getId()).);
 
-        //postResponse.setImagesData(post.getImages().stream());
-        //postResponse.setImages(post.getImages()); TODO convert image data to something that can be viewed
-        //postResponse.setLocation(post.getLocation()); TODO convert lat,long to address - Geo mapper?
         postResponse.setAddress(post.getAddress());
-        if (user != null) {
-
+        if (!username.isEmpty()) {
+            User user = userService.getUserByEmail(username);
             double distance = locationService.getDistanceFromPostInMeters(user.getLocation(), post.getLocation());
-
             if (distance != -1.0) {
                 String test = String.format("%.2f", distance);
-                //postResponse.setDistance(String.format("%.2f", distance) + " meters");
                 postResponse.setDistance(Double.valueOf(test));
 
                 // post tha are too far away will have '0' as id and the frontend will not display them
@@ -297,12 +230,7 @@ public class PostService {
                 }
             }
         }
-
-        //postRepository.setPostDistance(post.getId(), null);
-
-        //postResponse.setAnimalType(post.getAnimalType());
-
         return postResponse;
-
     }
+
 }

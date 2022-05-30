@@ -1,30 +1,25 @@
 package app.rescue.backend.payload;
 
-import app.rescue.backend.model.Image;
 import lombok.Data;
-
-import java.util.Collection;
-import java.util.List;
 
 @Data
 public class PostDto {
+    //common
     private Long id;
-    private String username;
-    private String userId;
-    private String postType;
-    private String createdAt;
-    private Double distance;
-    private int NumberOfComments;
-
-    //post fields
     private String title;
     private String body;
+    private String postType;
+    private String createdAt;
     private Boolean enableComments;
+    private int numberOfComments;
     private String date;
     private String thumbnail;
     private String address;
     private String latitude;
     private String longitude;
+    private Double distance;
+    private String userName;
+    private String userId;
 
     //animal characteristics
     private String animalType;

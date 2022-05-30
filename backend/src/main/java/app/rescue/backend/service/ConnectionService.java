@@ -1,10 +1,9 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.model.*;
-import app.rescue.backend.payload.UserDto;
+import app.rescue.backend.payload.ConnectionDto;
 import app.rescue.backend.repository.ConnectionRepository;
 import app.rescue.backend.repository.ImageRepository;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -20,6 +19,7 @@ public class ConnectionService {
 
     private final UserService userService;
 
+    //TODO imageRepository to imageService
     private final ImageRepository imageRepository;
 
     public ConnectionService(ConnectionRepository connectionRepository, UserService userService, ImageRepository imageRepository) {
@@ -28,101 +28,87 @@ public class ConnectionService {
         this.imageRepository = imageRepository;
     }
 
-    public Connection connectWith(Long userId, String userName) {
+    public Connection connectWith(Long userId, String username) {
         Connection connection = new Connection();
 
-        User user = userService.getUserByEmail(userName);
+        User user = userService.getUserByEmail(username);
+        User connectedToUser = userService.getUserById(userId);
 
-        User connectedTo = userService.getUserById(userId);
-
-        if (user.equals(connectedTo)) {
-            throw new IllegalStateException("You cannot connect with yourself");
+        if (connectionIsPossible(user, connectedToUser)) {
+            connection.setUser(user);
+            connection.setConnectedToId(userId);
+            setConnectionStatus(connection, connectedToUser.getUserRole());
+            connectionRepository.save(connection);
         }
-
-        if (user.getUserRole().equals(Role.ORGANIZATION)) {
-            throw new IllegalStateException("Organizations can't make connection requests");
-        }
-
-        if (alreadyConnected(user, connectedTo) ||
-                pendingConnection(user, connectedTo) || pendingConnection(connectedTo, user)) {
-            throw new IllegalStateException("Users are connected or there is already a connection request in progress");
-        }
-
-        connection.setUser(user);
-        connection.setConnectedToId(connectedTo.getId());
-
-        if (connectedTo.getUserRole().equals(Role.INDIVIDUAL)) {
-            connection.setConnectionStatus("PENDING");
-        }
-        else if (connectedTo.getUserRole().equals(Role.ORGANIZATION)) {
-            connection.setConnectionStatus("FOLLOWER");
-        }
-        connectionRepository.save(connection);
         return connection;
     }
-    
-    public List<UserDto> getAllFriendRequests(String userName) {
-        User user = userService.getUserByEmail(userName);
-        List<Connection> friendRequests = connectionRepository.findAllFriendRequests(user.getId());
-        return friendRequests.stream().map(this::mapFromConnectionToResponse).collect(Collectors.toList());
+
+    public List<ConnectionDto> getAllConnections(String connectionType, String username) {
+        User user = userService.getUserByEmail(username);
+        List<Connection> connections;
+        boolean getConnectedToUser;
+        switch (connectionType) {
+            case "friend-requests":
+                connections = connectionRepository.getAllByConnectedToIdAndConnectionStatus(user.getId(), "PENDING");
+                getConnectedToUser = false;
+                break;
+            case "followers":
+                connections = connectionRepository.getAllByConnectedToIdAndConnectionStatus(user.getId(), "FOLLOWER");
+                getConnectedToUser = false;
+                break;
+            case "friends":
+                connections = connectionRepository.getAllByUserAndConnectionStatus(user, "CONNECTED");
+                getConnectedToUser = true;
+                break;
+            case "organizations":
+                connections = connectionRepository.getAllByUserAndConnectionStatus(user, "FOLLOWER");
+                getConnectedToUser = true;
+                break;
+            default:
+                throw new IllegalStateException("Not a connection type");
+        }
+        return connections.stream().map(connection -> mapFromConnectionToResponse(connection, getConnectedToUser)).collect(Collectors.toList());
     }
 
-    public List<UserDto> getAllFriends(String userName) {
-        User user = userService.getUserByEmail(userName);
-        List<Connection> friends = connectionRepository.findAllFriends(user.getId());
-        return friends.stream().map(this::mapFromConnectionToResponse).collect(Collectors.toList());
+    //TODO CHECK EVERYTHING BELOW
+    public Boolean isConnectedTo(Long connectedToId, String username) {
+        User user = userService.getUserByEmail(username);
+        return alreadyConnected(user, userService.getUserById(connectedToId));
     }
 
-    public List<UserDto> getAllOrganizations(String userName) {
-        User user = userService.getUserByEmail(userName);
-        List<Connection> organizations = connectionRepository.findAllOrganizations(user);
-        return organizations.stream().map(this::mapFromConnectionToResponse).collect(Collectors.toList());
-    }
+    public Connection acceptConnection(Long userId, String username) {
+        User user = userService.getUserByEmail(username);
 
-    public List<UserDto> getAllFollowers(String userName) {
-        User user = userService.getUserByEmail(userName);
-        List<Connection> followers = connectionRepository.findAllFollowers(user.getId());
-        return followers.stream().map(this::mapFromFollowerToResponse).collect(Collectors.toList());
-    }
+        User connectedToUser = userService.getUserById(userId);
 
-    public Boolean  isConnectedTo(Long connectedToId, String userName) {
-        User user = userService.getUserByEmail(userName);
-        return connectionRepository.existsByUserAndConnectedToId(user, connectedToId);
-    }
-
-    public Connection acceptConnection(Long userId, String userName) {
-        User user = userService.getUserByEmail(userName);
-
-        User connectedTo = userService.getUserById(userId);
-
-        if (alreadyConnected(user, connectedTo)) {
+        if (alreadyConnected(user, connectedToUser)) {
             throw new IllegalStateException("Users already connected");
         }
 
-        if (!pendingConnection(connectedTo, user)) {
+        if (!pendingConnection(connectedToUser, user)) {
             throw new IllegalStateException(String.format("No connection request found from user ID:%s",userId));
         }
 
-        if (!user.getUserRole().equals(Role.INDIVIDUAL) && connectedTo.getUserRole().equals(Role.INDIVIDUAL)) {
+        if (!user.getUserRole().equals(Role.INDIVIDUAL) && connectedToUser.getUserRole().equals(Role.INDIVIDUAL)) {
             throw new IllegalStateException("This user can not accept connection requests");
         }
 
-        Connection connection = new Connection(user, connectedTo.getId(), "CONNECTED");
+        Connection connection = new Connection(user, connectedToUser.getId(), "CONNECTED");
 
         connectionRepository.save(connection);
 
-        connectionRepository.completeConnection(connectedTo, user.getId());
+        connectionRepository.completeConnection(connectedToUser, user.getId());
         return connection;
     }
 
-    public void invitationRegistration(User user, User invitedByUser) {
-        if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.INDIVIDUAL) {
-            connectionRepository.save(new Connection(user, invitedByUser.getId(), "ACCOUNT-DISABLED"));
-            connectionRepository.save(new Connection(invitedByUser, user.getId(), "REF-PENDING"));
+    public void invitationRegistration(User newUser, User invitedByUser) {
+        if (newUser.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.INDIVIDUAL) {
+            connectionRepository.save(new Connection(newUser, invitedByUser.getId(), "ACCOUNT-DISABLED"));
+            connectionRepository.save(new Connection(invitedByUser, newUser.getId(), "REF-PENDING"));
         }
-        else if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.ORGANIZATION) {
-            connectionRepository.save(new Connection(user, invitedByUser.getId(), "REF-FOLLOWER"));
-        }
+        //else if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.ORGANIZATION) {
+        //    connectionRepository.save(new Connection(user, invitedByUser.getId(), "REF-FOLLOWER"));
+        //}
     }
 
     public void completeRefConnection(User user) {
@@ -142,10 +128,11 @@ public class ConnectionService {
     public void deleteConnection(Long userId, String userName) {
         User user = userService.getUserByEmail(userName);
         User connectedToUser = userService.findById(userId);
-        Optional<Connection> connection1 = connectionRepository.getConnectionByUserAndConnectedToId(user, userId);
+
+        Optional<Connection> connection1 = connectionRepository.findConnectionByUserAndConnectedToId(user, userId);
         if (connection1.isPresent()) {
             connectionRepository.delete(connection1.get());
-            Optional<Connection> connection2 = connectionRepository.getConnectionByUserAndConnectedToId(connectedToUser, user.getId());
+            Optional<Connection> connection2 = connectionRepository.findConnectionByUserAndConnectedToId(connectedToUser, user.getId());
             connection2.ifPresent(connectionRepository::delete);
 
         }
@@ -155,92 +142,72 @@ public class ConnectionService {
         return connectionRepository.findConnectionsByUser(user);
     }
 
-    private boolean alreadyConnected(User user, User connectedTo) {
-        Optional<Connection> connection = connectionRepository.getConnectionByUserAndConnectedToId(user, connectedTo.getId());
+    private boolean connectionIsPossible(User user, User connectedToUser) {
+        if (user.equals(connectedToUser)) {
+            throw new IllegalStateException("You cannot connect with yourself");
+        }
+
+        if (user.getUserRole().equals(Role.ORGANIZATION)) {
+            throw new IllegalStateException("Organizations can't make connection requests");
+        }
+
+        if (alreadyConnected(user, connectedToUser) || alreadyConnected(connectedToUser, user)) {
+            throw new IllegalStateException("Users are connected or there is already a connection request in progress");
+        }
+        return true;
+    }
+
+    private boolean alreadyConnected(User user, User connectedToUser) {
+        Optional<Connection> connection = connectionRepository.findConnectionByUserAndConnectedToId(user, connectedToUser.getId());
         return connection.isPresent();
     }
 
-    private boolean pendingConnection(User user, User connectedTo) {
-        Optional<Connection> connection = connectionRepository.getPendingConnection(user, connectedTo.getId());
-        return connection.isPresent();
+    private void setConnectionStatus(Connection connection, Role userRole) {
+        if (userRole.equals(Role.INDIVIDUAL)) {
+            connection.setConnectionStatus("PENDING");
+        }
+        else if (userRole.equals(Role.ORGANIZATION)) {
+            connection.setConnectionStatus("FOLLOWER");
+        }
+        else {
+            throw new IllegalStateException("Not an User Role");
+        }
     }
 
-    private UserDto mapFromConnectionToResponse(Connection connection) {
-        UserDto response = new UserDto();
-        User user = userService.getUserById(connection.getUser().getId());
+    private ConnectionDto mapFromConnectionToResponse(Connection connection, boolean getConnectedToUser) {
+        ConnectionDto response = new ConnectionDto();
+        User user;
 
-        Image profileImage;
-        User connectedToUser = userService.getUserById(connection.getConnectedToId());
-        if (connectedToUser.getUserRole().equals(Role.INDIVIDUAL)) {
-            response.setId(user.getId().toString());
-            response.setName(user.getName());
+        if (getConnectedToUser) {
+            user = userService.getUserById(connection.getConnectedToId());
+        }
+        else {
+            user = connection.getUser();
+        }
+
+        response.setUserId(user.getId().toString());
+        response.setName(user.getName());
+        if (user.getUserRole().equals(Role.INDIVIDUAL)) {
             response.setLastName(user.getIndividualInformation().getLastName());
-            profileImage = imageRepository.findByUserAndProfileImage(user, true);
-        }
-        else if (connectedToUser.getUserRole().equals(Role.ORGANIZATION)) {
-            response.setId(connectedToUser.getId().toString());
-            response.setName(connectedToUser.getName());
-            profileImage = imageRepository.findByUserAndProfileImage(connectedToUser, true);
-        }
-        else {
-            throw new IllegalStateException("connection profile Image error");
         }
 
 
-        //Image profileImage = imageRepository.findByUserAndProfileImage(user, true);
+        //TODO method to get profile image
+        Image profileImage = imageRepository.findByUserAndProfileImage(user, true);
+
         String profileImageLink = ServletUriComponentsBuilder
                 .fromCurrentContextPath()
                 .path("/api/v1/images/image/")
                 .path(String.valueOf(profileImage.getId()))
                 .toUriString();
         response.setProfileImage(profileImageLink);
-
-
 
         return response;
     }
-    //TODO THIS NEEDS TO BE BETTER
 
-    private UserDto mapFromFollowerToResponse(Connection connection) {
-        UserDto response = new UserDto();
-        //User organization = userService.getUserById(connection.getConnectedToId());
-
-        User follower = userService.getUserById(connection.getUser().getId());
-
-        response.setId(follower.getId().toString());
-        response.setName(follower.getName());
-        response.setLastName(follower.getIndividualInformation().getLastName());
-        Image profileImage = imageRepository.findByUserAndProfileImage(follower, true);
-        /*
-
-        if (follower.getUserRole().equals(Role.INDIVIDUAL)) {
-            response.setId(follower.getId().toString());
-            response.setName(follower.getName());
-            response.setLastName(follower.getIndividualInformation().getLastName());
-            profileImage = imageRepository.findByUserAndProfileImage(follower, true);
-        }
-        else if (follower.getUserRole().equals(Role.ORGANIZATION)) {
-            response.setId(follower.getId().toString());
-            response.setName(follower.getName());
-            profileImage = imageRepository.findByUserAndProfileImage(follower, true);
-        }
-        else {
-            throw new IllegalStateException("connection profile Image error");
-        }
-        */
-
-
-        //Image profileImage = imageRepository.findByUserAndProfileImage(user, true);
-        String profileImageLink = ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .path("/api/v1/images/image/")
-                .path(String.valueOf(profileImage.getId()))
-                .toUriString();
-        response.setProfileImage(profileImageLink);
-
-
-
-        return response;
+    private boolean pendingConnection(User user, User connectedToUser) {
+        Optional<Connection> connection = connectionRepository.getPendingConnection(user, connectedToUser.getId());
+        return connection.isPresent();
     }
 
 }

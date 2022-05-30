@@ -1,7 +1,6 @@
 package app.rescue.backend.util;
 
 import app.rescue.backend.payload.UserDto;
-import app.rescue.backend.payload.request.RegistrationRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;

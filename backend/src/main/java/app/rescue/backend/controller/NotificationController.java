@@ -1,9 +1,7 @@
 package app.rescue.backend.controller;
 
 import app.rescue.backend.payload.NotificationDto;
-import app.rescue.backend.payload.resposne.NotificationResponse;
 import app.rescue.backend.service.NotificationService;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

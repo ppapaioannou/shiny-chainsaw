@@ -35,19 +35,16 @@ public class LocationService {
         }
 
         /*
-        I found that the unit distance returned when call some of the methods distance
-        calculation with this api will be in degree unit. To convert it to kilometer,
-        assumes that value returned is d then you need to convert it to radian and
-        multiply with earth radius 6371km. The formula would be d / 180 * PI * 6371.
+        The method distance of this api is in degree unit.
+        To turn it to meters this formula must be used: L = π * R * a / 180,
+        where 'R' is the earth radius 6371km
+        and 'a' is the initial measurement
          */
         double distance = userLocation.getCentroid().distance(postLocation);
 
-        //L = π * R * a / 180
         distance = (Math.PI * 6371000 * distance) / 180 ;
 
-        //return String.format("%.2f", distance) + " meters";
         return distance;
-        //return String.valueOf(distance);
     }
 
     public boolean proximityCheck(Geometry userLocation, Geometry postLocation) {

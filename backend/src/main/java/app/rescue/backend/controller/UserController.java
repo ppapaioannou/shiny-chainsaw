@@ -29,26 +29,25 @@ public class UserController {
         this.imageService = imageService;
     }
 
+    @PostMapping(path = "ref/{email}")
+    public HttpStatus inviteFriend(@PathVariable String email, Principal principal) {
+        userService.inviteFriend(email, principal.getName());
+        return HttpStatus.OK;
+    }
+
     @GetMapping(path = "all")
     public ResponseEntity<List<UserDto>> getAllUsers(
             @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
-            @SearchSpec Specification<User> specs, Principal principal) {
-        return new ResponseEntity<>(userService.getAllUsers(pageNo, pageSize, sortBy, sortDir,
-                    Specification.where(specs), principal.getName()), HttpStatus.OK);
+            @SearchSpec Specification<User> specs) {
+        return new ResponseEntity<>(userService.getAllUsers(pageNo, pageSize, sortBy, sortDir, Specification.where(specs)), HttpStatus.OK);
     }
 
     @GetMapping(path = "{userId}")
     public ResponseEntity<UserDto> getSingleUser(@PathVariable String userId) {
         return new ResponseEntity<>(userService.getSingleUser(Long.valueOf(userId)), HttpStatus.OK);
-    }
-
-    @PostMapping(path = "ref/{email}")
-    public HttpStatus inviteFriend(@PathVariable String email, Principal principal) {
-        userService.inviteFriend(email, principal.getName());
-        return HttpStatus.OK;
     }
 
     @PutMapping(path = "update-location")
@@ -58,7 +57,7 @@ public class UserController {
     }
 
     @PutMapping(path = "update-info")
-    public ResponseEntity<String> updateUserInfo(@RequestParam("request") UserDto request,
+    public ResponseEntity<String> updateUserInfo(@RequestParam("payload") UserDto request,
                                                  @RequestParam(value = "file", required = false) MultipartFile profileImage,
                                                  Principal principal) throws IOException {
         userService.updateUserInfo(request, principal.getName());
@@ -66,44 +65,12 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "delete")
-    public ResponseEntity<String> deleteUserAccount(Principal principal) {
-        userService.deleteUserAccount(principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-/*
-    private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @GetMapping(path = "individuals")
-    public ResponseEntity<List<UserResponse>> getAllIndividuals() {
-        return new ResponseEntity<>(userService.getAllUsers("INDIVIDUAL"), HttpStatus.OK);
-
-    }
-
-    @GetMapping(path = "organizations")
-    public ResponseEntity<List<UserResponse>> getAllOrganizations() {
-        return new ResponseEntity<>(userService.getAllUsers("ORGANIZATION"), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "{userId}")
-    public ResponseEntity<UserResponse> getSingleUser(@PathVariable String userId) {
-        return new ResponseEntity<>(userService.getSingleUser(Long.valueOf(userId)), HttpStatus.OK);
-    }
-
-    @PutMapping(path = "update/{userId}")
-    public ResponseEntity<String> updateUserInfo(@RequestBody RegistrationDto userUpdate, @PathVariable String userId) {
-        //userService.updateUserInfo(userUpdate, Long.valueOf(userId));
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    //TODO @PutMapping(path = "change-password") changePassword(@RequestBody Principal principal)
 
     @DeleteMapping(path = "delete")
-    public ResponseEntity<String> deleteUserAccount() {
-        userService.deleteUserAccount();
+    public ResponseEntity<String> deleteAccount(Principal principal) {
+        userService.deleteAccount(principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
-*/
+
 }

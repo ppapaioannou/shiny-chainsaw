@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
@@ -35,9 +34,6 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<Notification> notificationsSent = new ArrayList<>();
-
-    @Column(name = "enable_comments", nullable = false)
-    private Boolean enableComments = true;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -171,14 +167,6 @@ public class Post {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public Boolean getEnableComments() {
-        return enableComments;
-    }
-
-    public void setEnableComments(Boolean enableComments) {
-        this.enableComments = enableComments;
     }
 
     public Collection<Notification> getNotificationsSent() {

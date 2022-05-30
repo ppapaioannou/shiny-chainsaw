@@ -1,10 +1,9 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.model.User;
-import app.rescue.backend.payload.request.CommentRequest;
+import app.rescue.backend.payload.CommentDto;
 import app.rescue.backend.model.Comment;
 import app.rescue.backend.model.Post;
-import app.rescue.backend.payload.resposne.CommentResponse;
 import app.rescue.backend.repository.CommentRepository;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +26,13 @@ public class CommentService {
     }
 
 
-    public Comment createNewComment(CommentRequest request, Long postId, String userName) {
-        Post post = postService.findById(postId);
-        User user = userService.getUserByEmail(userName);
-        Comment comment = mapFromRequestToComment(request, post);
-        comment.setUser(user);
+    public Comment addNewComment(CommentDto request, String username) {
+        User user = userService.getUserByEmail(username);
+        Post post = postService.findById(request.getPostId());
+
+        Comment comment = new Comment(user, post, request.getBody());
         commentRepository.save(comment);
+
         if (!post.getUser().equals(user)) {
             postService.addCommentator(post, user);
         }
@@ -40,19 +40,18 @@ public class CommentService {
         return comment;
     }
 
-    public List<CommentResponse> getAllPostComments(Long postId) {
+    public List<CommentDto> getAllPostComments(Long postId) {
         Post post = postService.findById(postId);
         List<Comment> comments = commentRepository.findAllCommentsByPost(post);
         return comments.stream().map(this::mapFromCommentToResponse).collect(Collectors.toList());
     }
 
-    public void updateComment() {
-    }
+    //TODO public void editComment()
 
-    public void deleteComment(Long commentId, String userName) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() ->
-                new IllegalStateException(String.format("Comment not found for ID:%s", commentId)));
-        if (comment.getUser().getEmail().equals(userName)) {
+    public void deleteComment(Long commentId, String username) {
+        Comment comment = findById(commentId);
+        String commentOwner = comment.getUser().getEmail();
+        if (commentOwner.equals(username)){
             commentRepository.delete(comment);
         }
         else {
@@ -60,29 +59,29 @@ public class CommentService {
         }
     }
 
-    private Comment mapFromRequestToComment(CommentRequest request, Post post) {
-        Comment comment = new Comment();
-        if (!post.getEnableComments()) {
-            throw new IllegalStateException("Comments are not allowed on this post");
-        }
-        comment.setPost(post);
-        comment.setBody(request.getBody());
-
-        //if (!post.getCommentators().contains(comment.getUser())) {
-        //post.addCommentator(comment.getUser());
-        //}
-        return comment;
+    public Comment findById(Long id) {
+        return commentRepository.findById(id).orElseThrow(() ->
+                new IllegalStateException(String.format("Comment not found for ID:%s", id)));
     }
 
-    private CommentResponse mapFromCommentToResponse(Comment comment) {
+    private CommentDto mapFromCommentToResponse(Comment comment) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
-        CommentResponse commentResponse = new CommentResponse();
-        commentResponse.setUsername(comment.getUser().getName() + " " + comment.getUser().getIndividualInformation().getLastName());
-        commentResponse.setPostId(String.valueOf(comment.getPost().getId()));
-        commentResponse.setBody(comment.getBody());
-        commentResponse.setCreatedAt(comment.getCreatedAt().format(dateTimeFormatter));
+        CommentDto response = new CommentDto();
+        response.setId(comment.getId());
+        response.setPostId(comment.getPost().getId());
+        response.setBody(comment.getBody());
 
-        return commentResponse;
+        User user = comment.getUser();
+        response.setUserId(user.getId());
+        String userName = user.getName();
+        if (comment.getUser().getIndividualInformation() != null) {
+            userName +=  " " + user.getIndividualInformation().getLastName();
+        }
+        response.setUserName(userName);
+        response.setCreatedAt(comment.getCreatedAt().format(dateTimeFormatter));
+
+        return response;
     }
+
 }

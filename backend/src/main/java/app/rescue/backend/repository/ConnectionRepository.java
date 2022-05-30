@@ -15,7 +15,16 @@ import java.util.Optional;
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
-    Optional<Connection> getConnectionByUserAndConnectedToId(User user, Long connectedToId);
+    Optional<Connection> findConnectionByUserAndConnectedToId(User user, Long connectedToId);
+
+    List<Connection> getAllByConnectedToIdAndConnectionStatus(Long connectedToId, String connectionStatus);
+
+    List<Connection> getAllByUserAndConnectionStatus(User user, String connectionStatus);
+
+
+
+
+
 
     @Query("SELECT c FROM Connection c WHERE c.user = ?1 AND c.connectedToId = ?2 AND c.connectionStatus = 'PENDING'")
     Optional<Connection> getPendingConnection(User user, Long connectedToId);
@@ -34,17 +43,5 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
     Collection<Connection> findConnectionsByUser(User user);
 
-    @Query("SELECT c FROM Connection c WHERE c.connectedToId = ?1 AND c.connectionStatus = 'PENDING'")
-    List<Connection> findAllFriendRequests(Long userId);
 
-    @Query("SELECT c FROM Connection c WHERE c.connectedToId = ?1 AND c.connectionStatus = 'CONNECTED'")
-    List<Connection> findAllFriends(Long userId);
-
-    @Query("SELECT c FROM Connection c WHERE c.user = ?1 AND c.connectionStatus = 'FOLLOWER'")
-    List<Connection> findAllOrganizations(User user);
-
-    @Query("SELECT c FROM Connection c WHERE c.connectedToId = ?1 AND c.connectionStatus = 'FOLLOWER'")
-    List<Connection> findAllFollowers(Long userId);
-
-    Boolean existsByUserAndConnectedToId(User user, Long connectedToId);
 }

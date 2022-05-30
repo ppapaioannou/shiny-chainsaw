@@ -1,25 +1,18 @@
-package app.rescue.backend.payload.request;
+package app.rescue.backend.payload;
 
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-
 
 @Data
-public class RegistrationRequest {
+public class RegistrationDto {
     //common fields
     private String email;
     private String password;
     private String name;
-    //private Byte[] profileImage;
-    //private MultipartFile profileImage;
     private String phoneNumber;
     private String description;
 
     //individual fields
     private String lastName;
-    //private final String dateOfBirth;
 
     //Organization fields
     private String contactEmail;
@@ -31,3 +24,4 @@ public class RegistrationRequest {
     private String organizationNeeds;
 
 }
+

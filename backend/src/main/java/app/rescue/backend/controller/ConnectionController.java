@@ -1,12 +1,9 @@
 package app.rescue.backend.controller;
 
-
 import app.rescue.backend.model.Connection;
 import app.rescue.backend.payload.ConnectionDto;
-import app.rescue.backend.payload.UserDto;
 import app.rescue.backend.service.ConnectionService;
 import app.rescue.backend.service.NotificationService;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,34 +25,18 @@ public class ConnectionController {
 
     @PostMapping(path="with/{userId}")
     public ResponseEntity<String> connectWith(@PathVariable Long userId, Principal principal) {
-        //TODO Connection or Connection Response
         Connection connection = connectionService.connectWith(userId, principal.getName());
         notificationService.sendConnectionRequestNotification(connection);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping(path="friend-requests")
-    public ResponseEntity<List<UserDto>> getAllFriendRequests(Principal principal) {
-        return new ResponseEntity<>(connectionService.getAllFriendRequests(principal.getName()), HttpStatus.OK);
-    }
-
-    @GetMapping(path="friends")
-    public ResponseEntity<List<UserDto>> getAllFriends(Principal principal) {
-        return new ResponseEntity<>(connectionService.getAllFriends(principal.getName()), HttpStatus.OK);
-    }
-
-    @GetMapping(path="organizations")
-    public ResponseEntity<List<UserDto>> getAllOrganizations(Principal principal) {
-        return new ResponseEntity<>(connectionService.getAllOrganizations(principal.getName()), HttpStatus.OK);
-    }
-
-    @GetMapping(path="followers")
-    public ResponseEntity<List<UserDto>> getAllFollowers(Principal principal) {
-        return new ResponseEntity<>(connectionService.getAllFollowers(principal.getName()), HttpStatus.OK);
+    @GetMapping(path="{connectionType}")
+    public ResponseEntity<List<ConnectionDto>> getAllConnections(@PathVariable String connectionType, Principal principal) {
+        return new ResponseEntity<>(connectionService.getAllConnections(connectionType, principal.getName()), HttpStatus.OK);
     }
 
     @GetMapping(path="is-connected-to/{connectedToId}")
-    public ResponseEntity<Boolean> getAllFriends(@PathVariable Long connectedToId, Principal principal) {
+    public ResponseEntity<Boolean> isConnectedTo(@PathVariable Long connectedToId, Principal principal) {
         return new ResponseEntity<>(connectionService.isConnectedTo(connectedToId, principal.getName()), HttpStatus.OK);
     }
 

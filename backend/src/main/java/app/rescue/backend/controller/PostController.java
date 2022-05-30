@@ -31,18 +31,12 @@ public class PostController {
         this.notificationService = notificationService;
     }
 
-    @PostMapping(path = "new-post/{postType}")
-    public ResponseEntity<String> createNewPost(@RequestParam("request") PostDto request,
+    @PostMapping(path = "add-post/{postType}")
+    public ResponseEntity<String> createNewPost(@RequestParam("payload") PostDto request,
                                                 @RequestParam(value = "file", required = false) MultipartFile[] images,
                                                 @PathVariable String postType, Principal principal) throws IOException {
-
-
         Post post = postService.createNewPost(request, postType, principal.getName());
-        if (images != null) {
-            for (MultipartFile image : images) {
-                imageService.storePostImage(post, image);
-            }
-        }
+        imageService.storePostImages(post, images);
         notificationService.sendNewPostNotification(post);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -54,6 +48,7 @@ public class PostController {
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
             @SearchSpec Specification<Post> specs, Principal principal) {
+        // if no user is logged in then don't display location information
         if (principal != null) {
             return new ResponseEntity<>(postService.getAllPosts(pageNo, pageSize, sortBy, sortDir,
                     Specification.where(specs), principal.getName()), HttpStatus.OK);
@@ -73,11 +68,7 @@ public class PostController {
         }
     }
 
-    @PutMapping(path = "edit/{postId}")
-    public ResponseEntity<String> updatePost(@PathVariable Long postId, Principal principal) {
-        postService.updatePost(postId, principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    //TODO @PutMapping(path = "edit/{postId}") editPost(@PathVariable Long postId, Principal principal)
 
     @PutMapping(path = "event/{postId}/attend")
     public ResponseEntity<String> willAttendEvent(@PathVariable Long postId, Principal principal) {
@@ -85,12 +76,7 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping(path = "event/{postId}/not-attend")
-    public ResponseEntity<String> willNotAttendEvent(@PathVariable Long postId, Principal principal) {
-        //TODO NOT ATTEND
-        postService.willAttendEvent(postId, principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    //TODO @PutMapping(path = "event/{postId}/not-attend") willNotAttendEvent(@PathVariable Long postId, Principal principal)
 
     @DeleteMapping(path = "delete/{postId}")
     public ResponseEntity<String> deletePost(@PathVariable Long postId, Principal principal) {
