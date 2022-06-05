@@ -88,7 +88,7 @@ public class NotificationService {
 
     public List<NotificationDto> getAllNotifications(String name) {
         User user = userService.getUserByEmail(name);
-        List<Notification> notifications = notificationRepository.findAllByUserOrderByCreatedAtDesc(user);
+        List<Notification> notifications = notificationRepository.findAllByUserOrderByIdDesc(user);
         return notifications.stream().map(this::mapFromNotificationToResponse).collect(Collectors.toList());
     }
 

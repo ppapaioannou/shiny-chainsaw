@@ -62,7 +62,8 @@ public class Image {
         return name;
     }
 
-    public Image(Post post, String name, String type, byte[] data) {
+    public Image(User user, Post post, String name, String type, byte[] data) {
+        this.user = user;
         this.post = post;
         this.name = name;
         this.type = type;

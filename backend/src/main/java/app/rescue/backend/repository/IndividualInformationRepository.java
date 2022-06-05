@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface IndividualInformationRepository extends JpaRepository<IndividualInformation, Long> {
+
     @Transactional
     @Modifying
     @Query("UPDATE IndividualInformation i SET i.user = ?2 WHERE i = ?1")

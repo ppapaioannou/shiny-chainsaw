@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,21 +26,22 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
 
     @Query("SELECT c FROM Connection c WHERE c.user = ?1 AND c.connectedToId = ?2 AND c.connectionStatus = 'PENDING'")
-    Optional<Connection> getPendingConnection(User user, Long connectedToId);
+    Optional<Connection> findPendingConnection(User user, Long connectedToId);
 
     @Transactional
     @Modifying
     @Query("UPDATE Connection c SET c.connectionStatus = 'CONNECTED' WHERE c.user = ?1 AND c.connectedToId = ?2")
     void completeConnection(User userOne, Long connectedToId);
 
-    Optional<Connection> findByUser(User user);
+    @Query("SELECT c FROM Connection c WHERE c.user = ?1 AND c.connectionStatus = 'REF-PENDING'")
+    Optional<Connection> findRefPendingConnection(User user);
 
     @Transactional
     @Modifying
     @Query("UPDATE Connection c SET c.connectionStatus = 'FOLLOWER' WHERE c.user = ?1")
     void completeRefOrgConnection(User user);
 
-    Collection<Connection> findConnectionsByUser(User user);
+    List<Connection> findConnectionsByUser(User user);
 
 
 }

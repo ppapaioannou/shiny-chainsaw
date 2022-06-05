@@ -7,7 +7,6 @@ import app.rescue.backend.repository.ImageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -106,20 +105,21 @@ public class ConnectionService {
             connectionRepository.save(new Connection(newUser, invitedByUser.getId(), "ACCOUNT-DISABLED"));
             connectionRepository.save(new Connection(invitedByUser, newUser.getId(), "REF-PENDING"));
         }
-        //else if (user.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.ORGANIZATION) {
-        //    connectionRepository.save(new Connection(user, invitedByUser.getId(), "REF-FOLLOWER"));
-        //}
+        else if (newUser.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.ORGANIZATION) {
+            connectionRepository.save(new Connection(newUser, invitedByUser.getId(), "REF-FOLLOWER"));
+        }
     }
 
     public void completeRefConnection(User user) {
-        Optional<Connection> connection = connectionRepository.findByUser(user);
-        if (connection.isPresent() && !connection.get().getConnectionStatus().equals("REF-PENDING")) {
+        Optional<Connection> connection = connectionRepository.findRefPendingConnection(user);
+        if (connection.isPresent()) {
             User connectedTo = userService.getUserById(connection.get().getConnectedToId());
             if (connectedTo.getUserRole().equals(Role.INDIVIDUAL)) {
                 connectionRepository.completeConnection(user, connectedTo.getId());
                 connectionRepository.completeConnection(connectedTo, user.getId());
             }
             else if (connectedTo.getUserRole().equals(Role.ORGANIZATION)) {
+                // TODO check if this is working
                 connectionRepository.completeRefOrgConnection(user);
             }
         }
@@ -138,7 +138,7 @@ public class ConnectionService {
         }
     }
 
-    public Collection<Connection> findConnectionsByUser(User user) {
+    public List<Connection> findConnectionsByUser(User user) {
         return connectionRepository.findConnectionsByUser(user);
     }
 
@@ -206,7 +206,7 @@ public class ConnectionService {
     }
 
     private boolean pendingConnection(User user, User connectedToUser) {
-        Optional<Connection> connection = connectionRepository.getPendingConnection(user, connectedToUser.getId());
+        Optional<Connection> connection = connectionRepository.findPendingConnection(user, connectedToUser.getId());
         return connection.isPresent();
     }
 

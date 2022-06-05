@@ -101,8 +101,7 @@ public class ImageService {
         if (files != null) {
             for (MultipartFile file : files) {
                 String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-                Image image = new Image(post, fileName, file.getContentType(), file.getBytes());
-                image.setUser(post.getUser());
+                Image image = new Image(post.getUser(), post, fileName, file.getContentType(), file.getBytes());
                 imageRepository.save(image);
             }
         }

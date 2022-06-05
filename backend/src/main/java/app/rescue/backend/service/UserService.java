@@ -152,7 +152,8 @@ public class UserService {
 
         if (user.getIndividualInformation() != null) {
             user.getIndividualInformation().setLastName(request.getLastName());
-            if (!Objects.equals(request.getDateOfBirth(), "")) {
+            //if (!Objects.equals(request.getDateOfBirth(), "")) {
+            if (request.getDateOfBirth() != null) {
                 user.getIndividualInformation().setDateOfBirth(Date.valueOf(request.getDateOfBirth()));
             }
         }
