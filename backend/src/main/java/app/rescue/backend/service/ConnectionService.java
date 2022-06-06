@@ -127,7 +127,7 @@ public class ConnectionService {
 
     public void deleteConnection(Long userId, String userName) {
         User user = userService.getUserByEmail(userName);
-        User connectedToUser = userService.findById(userId);
+        User connectedToUser = userService.getUserById(userId);
 
         Optional<Connection> connection1 = connectionRepository.findConnectionByUserAndConnectedToId(user, userId);
         if (connection1.isPresent()) {

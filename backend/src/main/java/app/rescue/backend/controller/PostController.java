@@ -7,6 +7,7 @@ import app.rescue.backend.service.NotificationService;
 import app.rescue.backend.service.PostService;
 import app.rescue.backend.util.AppConstants;
 import com.sipios.springsearch.anotation.SearchSpec;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,13 +49,13 @@ public class PostController {
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
             @SearchSpec Specification<Post> specs, Principal principal) {
+        // create Pageable instance
+        Pageable pageable = AppConstants.createPageableRequest(pageNo, pageSize, sortBy, sortDir);
         // if no user is logged in then don't display location information
         if (principal != null) {
-            return new ResponseEntity<>(postService.getAllPosts(pageNo, pageSize, sortBy, sortDir,
-                    Specification.where(specs), principal.getName()), HttpStatus.OK);
+            return new ResponseEntity<>(postService.getAllPosts(pageable, Specification.where(specs), principal.getName()), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(postService.getAllPosts(pageNo, pageSize, sortBy, sortDir,
-                    Specification.where(specs), ""), HttpStatus.OK);
+            return new ResponseEntity<>(postService.getAllPosts(pageable, Specification.where(specs), ""), HttpStatus.OK);
         }
 
     }

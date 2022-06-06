@@ -9,9 +9,7 @@ import app.rescue.backend.repository.UserRepository;
 import app.rescue.backend.util.EmailSender;
 import app.rescue.backend.util.EmailValidator;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,8 +17,6 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,14 +52,12 @@ public class UserService {
     }
 
     public String signUpUser(User newUser) {
-        Optional<User> userExists = userRepository.findByEmail(newUser.getEmail());
-        if (userExists.isPresent()) {
-            if (userExists.get().isEnabled()) {
+        if (userRepository.existsByEmail(newUser.getEmail())) {
+            if (userRepository.existsByEmailAndEnabled(newUser.getEmail(), true)) {
                 throw new IllegalStateException("User with that email already exists");
             }
-            userRepository.delete(userExists.get());
+            userRepository.delete(newUser);
         }
-
         String encodedPassword = passwordEncoder.encode(newUser.getPassword());
         newUser.setPassword(encodedPassword);
 
@@ -75,9 +69,7 @@ public class UserService {
         else if (newUser.getUserRole().equals(Role.ORGANIZATION)) {
             organizationInformationRepository.setOrganizationInformationUser(newUser.getOrganizationInformation(), newUser);
         }
-
         ConfirmationToken confirmationToken = createConfirmationToken(newUser);
-
         return confirmationToken.getToken();
     }
 
@@ -98,30 +90,13 @@ public class UserService {
         emailSender.send(email, name, confirmationLink);
     }
 
-    public List<UserDto> getAllUsers(int pageNo, int pageSize, String sortBy, String sortDir,
-                                     Specification<User> specs) {
-
-        Sort sort;
-        if (sortDir.equalsIgnoreCase("asc")) {
-            sort = Sort.by(sortBy).ascending();
-        }
-        else if (sortDir.equalsIgnoreCase("desc")) {
-            sort = Sort.by(sortBy).descending();
-        }
-        else {
-            throw new IllegalStateException("unknown sorting method");
-        }
-
-        // create Pageable instance
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-
+    public List<UserDto> getAllUsers(Specification<User> specs, Pageable pageable) {
         Page<User> users = userRepository.findAll(specs, pageable);
-
         return users.stream().map(this::mapFromUserToResponse).collect(Collectors.toList());
     }
 
     public UserDto getSingleUser(Long userId) {
-        User user = findById(userId);
+        User user = getUserById(userId);
         return mapFromUserToResponse(user);
     }
 
@@ -130,14 +105,7 @@ public class UserService {
         if (request.getLatitude() != null && request.getLongitude() != null) {
             double latitude = Double.parseDouble(request.getLatitude());
             double longitude = Double.parseDouble(request.getLongitude());
-            double diameterInMeters;
-            if (request.getDiameterInMeters().equals("inf")) {
-                //earth diameter in meters
-                diameterInMeters = 12742000.0;
-            }
-            else {
-                diameterInMeters = Double.parseDouble(request.getDiameterInMeters());
-            }
+            double diameterInMeters = Double.parseDouble(request.getDiameterInMeters());
             user.setLocation(locationService.userLocationToCircle(latitude, longitude, diameterInMeters));
             userRepository.save(user);
         }
@@ -152,7 +120,6 @@ public class UserService {
 
         if (user.getIndividualInformation() != null) {
             user.getIndividualInformation().setLastName(request.getLastName());
-            //if (!Objects.equals(request.getDateOfBirth(), "")) {
             if (request.getDateOfBirth() != null) {
                 user.getIndividualInformation().setDateOfBirth(Date.valueOf(request.getDateOfBirth()));
             }
@@ -202,10 +169,18 @@ public class UserService {
         return confirmationToken;
     }
 
+
+    //TODO DELETE THIS IF NO ERROR
+    //was used on Connection service deleteConnection()
+    //and UserService getSingleUser
+    //weird
+    /*
     public User findById(Long id) {
         return userRepository.findById(id).orElseThrow(() ->
                 new IllegalStateException("User does not exits"));
     }
+    */
+
 
     private UserDto mapFromUserToResponse(User user) {
         UserDto response = new UserDto();

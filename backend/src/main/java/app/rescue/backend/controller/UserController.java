@@ -7,6 +7,7 @@ import app.rescue.backend.service.ImageService;
 import app.rescue.backend.service.UserService;
 import app.rescue.backend.util.AppConstants;
 import com.sipios.springsearch.anotation.SearchSpec;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,9 @@ public class UserController {
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
             @SearchSpec Specification<User> specs) {
-        return new ResponseEntity<>(userService.getAllUsers(pageNo, pageSize, sortBy, sortDir, Specification.where(specs)), HttpStatus.OK);
+        // create Pageable instance
+        Pageable pageable = AppConstants.createPageableRequest(pageNo, pageSize, sortBy, sortDir);
+        return new ResponseEntity<>(userService.getAllUsers(Specification.where(specs), pageable), HttpStatus.OK);
     }
 
     @GetMapping(path = "{userId}")

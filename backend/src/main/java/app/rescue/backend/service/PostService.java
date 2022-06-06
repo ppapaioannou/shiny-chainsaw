@@ -7,9 +7,7 @@ import app.rescue.backend.repository.EventPropertiesRepository;
 import app.rescue.backend.repository.PostRepository;
 import com.vividsolutions.jts.geom.Geometry;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -65,22 +63,7 @@ public class PostService {
         return post;
     }
 
-    public List<PostDto> getAllPosts(int pageNo, int pageSize, String sortBy, String sortDir,
-                                     Specification<Post> specs, String username) {
-        Sort sort;
-        if (sortDir.equalsIgnoreCase("asc")) {
-            sort = Sort.by(sortBy).ascending();
-        }
-        else if (sortDir.equalsIgnoreCase("desc")) {
-            sort = Sort.by(sortBy).descending();
-        }
-        else {
-            throw new IllegalStateException("unknown sorting method");
-        }
-
-        // create Pageable instance
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-
+    public List<PostDto> getAllPosts(Pageable pageable, Specification<Post> specs, String username) {
         Page<Post> posts = postRepository.findAll(specs, pageable);
         return posts.stream().map(post -> mapFromPostToResponse(post, username)).collect(Collectors.toList());
     }

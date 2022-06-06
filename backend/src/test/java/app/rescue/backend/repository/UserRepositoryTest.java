@@ -92,6 +92,32 @@ class UserRepositoryTest {
         assertThat(actual).isNotPresent();
     }
 
+    @Test
+    void existsByEmail() {
+        boolean actual = underTest.existsByEmail(expected.getEmail());
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void notExistsByEmail() {
+        boolean actual = underTest.existsByEmail(new User().getEmail());
+        assertThat(actual).isFalse();
+    }
+
+    @Test
+    void existsByEmailAndEnabled() {
+        underTest.enableUser(expected.getEmail());
+        entityManager.clear();
+        boolean actual = underTest.existsByEmailAndEnabled(expected.getEmail(), true);
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void notExistsByEmailAndEnabled() {
+        boolean actual = underTest.existsByEmailAndEnabled(expected.getEmail(), true);
+        assertThat(actual).isFalse();
+    }
+
     private User getUser() {
         User user = new User();
         user.setEmail("user@example.com");

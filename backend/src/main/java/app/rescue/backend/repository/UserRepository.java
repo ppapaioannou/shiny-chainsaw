@@ -21,4 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     Optional<User> findByReferralToken(String referralToken);
 
+    boolean existsByEmail(String email);
+    boolean existsByEmailAndEnabled(String email, boolean enabled);
+
 }
