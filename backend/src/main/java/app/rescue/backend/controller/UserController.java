@@ -5,7 +5,7 @@ import app.rescue.backend.payload.LocationDto;
 import app.rescue.backend.payload.UserDto;
 import app.rescue.backend.service.ImageService;
 import app.rescue.backend.service.UserService;
-import app.rescue.backend.util.AppConstants;
+import app.rescue.backend.utility.AppConstants;
 import com.sipios.springsearch.anotation.SearchSpec;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

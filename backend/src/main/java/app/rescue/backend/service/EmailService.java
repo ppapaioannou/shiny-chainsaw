@@ -1,6 +1,6 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.util.EmailSender;
+import app.rescue.backend.utility.EmailSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;

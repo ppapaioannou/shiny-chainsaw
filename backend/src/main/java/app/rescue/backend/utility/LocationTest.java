@@ -1,12 +1,8 @@
-package app.rescue.backend.util;
+package app.rescue.backend.utility;
 
 
 import app.rescue.backend.service.LocationService;
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.util.GeometricShapeFactory;
 
 public class LocationTest {
 

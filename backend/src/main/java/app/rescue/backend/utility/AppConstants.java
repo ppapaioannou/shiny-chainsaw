@@ -1,4 +1,4 @@
-package app.rescue.backend.util;
+package app.rescue.backend.utility;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

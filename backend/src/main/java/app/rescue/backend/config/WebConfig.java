@@ -1,8 +1,8 @@
 package app.rescue.backend.config;
 
-import app.rescue.backend.util.StringToPostDtoConverter;
-import app.rescue.backend.util.StringToRegistrationDtoConverter;
-import app.rescue.backend.util.StringToUserDtoConverter;
+import app.rescue.backend.utility.converter.StringToPostDtoConverter;
+import app.rescue.backend.utility.converter.StringToRegistrationDtoConverter;
+import app.rescue.backend.utility.converter.StringToUserDtoConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;

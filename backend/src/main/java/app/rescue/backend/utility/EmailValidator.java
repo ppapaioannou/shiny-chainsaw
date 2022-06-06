@@ -1,8 +1,7 @@
-package app.rescue.backend.util;
+package app.rescue.backend.utility;
 
 import org.springframework.stereotype.Service;
 
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -1,4 +1,4 @@
-package app.rescue.backend.util;
+package app.rescue.backend.utility.converter;
 
 import app.rescue.backend.payload.RegistrationDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
