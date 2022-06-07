@@ -177,10 +177,12 @@ public class Post {
         this.notificationsSent = notificationsSent;
     }
 
-    public void addCommentator(User user) {
+    public boolean addCommentator(User user) {
         if (!commentators.contains(user)) {
             commentators.add(user);
+            return true;
         }
+        return false;
     }
     public Collection<User> getCommentators() {
         return commentators;

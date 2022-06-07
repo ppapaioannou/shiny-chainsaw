@@ -186,12 +186,10 @@ class UserServiceTest {
     @SuppressWarnings("unchecked")
     void canGetAllUsers() {
         // given
-        Pageable pageable = AppConstants.createPageableRequest(0, 10, "id", "desc");
         Specification<User> specs = Specification.where(null);
+        Pageable pageable = AppConstants.createPageableRequest(0, 10, "id", "desc");
 
         //Suppress the unchecked warning for mock classes with generic parameters
-        //mock(Page<User>)
-        //any(Specification<User>)
         Page<User> pagedUsers = mock(Page.class);
         given(userRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(pagedUsers);
         // when
@@ -294,7 +292,7 @@ class UserServiceTest {
     }
 
     @Test
-    void willThrowWhenUserNotGotByEmail() {
+    void getUserByEmailWillThrowWhenEmailNotFound() {
         // given
         User user = mock(User.class);
 
@@ -319,7 +317,7 @@ class UserServiceTest {
     }
 
     @Test
-    void willThrowWhenUserNotGotById() {
+    void getUserByIdWillThrowWhenUserDoesNotExist() {
         // given
         User user = mock(User.class);
 
@@ -332,7 +330,7 @@ class UserServiceTest {
     }
 
     @Test
-    void tryAndSucceedToFindUserById() {
+    void tryToFindUserByIdAndSucceed() {
         // given
         User user = mock(User.class);
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
@@ -345,7 +343,7 @@ class UserServiceTest {
     }
 
     @Test
-    void tryAndFailToFindUserById() {
+    void tryToFindUserByIdAndFail() {
         // given
         User user = mock(User.class);
 
@@ -370,7 +368,7 @@ class UserServiceTest {
     }
 
     @Test
-    void willThrowWhenUserNotGotByToken() {
+    void findByReferralTokenWillThrowWhenNotAReferralToken() {
         // given
         User user = mock(User.class);
 

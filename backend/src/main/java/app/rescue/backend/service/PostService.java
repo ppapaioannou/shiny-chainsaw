@@ -31,8 +31,6 @@ public class PostService {
     private final LocationService locationService;
     private final ImageService imageService;
 
-    //private final ImageController imageController;
-
     public PostService(PostRepository postRepository, AnimalCharacteristicsRepository animalCharacteristicsRepository,
                        EventPropertiesRepository eventPropertiesRepository, UserService userService,
                        LocationService locationService, ImageService imageService) {
@@ -63,7 +61,7 @@ public class PostService {
         return post;
     }
 
-    public List<PostDto> getAllPosts(Pageable pageable, Specification<Post> specs, String username) {
+    public List<PostDto> getAllPosts(Specification<Post> specs, Pageable pageable, String username) {
         Page<Post> posts = postRepository.findAll(specs, pageable);
         return posts.stream().map(post -> mapFromPostToResponse(post, username)).collect(Collectors.toList());
     }
@@ -75,25 +73,28 @@ public class PostService {
 
     //TODO public void editPost()
 
-    public void willAttendEvent(Long postId, String userName) {
+    public void attendEvent(Long postId, String username) {
         Post post = findById(postId);
         if (!post.getPostType().equals("event")) {
             throw new IllegalStateException("This is not an event");
         }
-        User user = userService.getUserByEmail(userName);
+        User user = userService.getUserByEmail(username);
 
-        if (post.getEventProperties().getEventAttendees().contains(user)) {
-            throw new IllegalStateException("Already answered");
+        if (eventPropertiesRepository.existsByPostAndEventAttendeesContaining(post, user)) {
+            post.getEventProperties().removeEventAttendee(user);
         }
-        post.getEventProperties().addEventAttendee(user);
+        else {
+            post.getEventProperties().addEventAttendee(user);
+        }
         postRepository.save(post);
+
     }
 
     //TODO public void willNotAttendEvent
 
-    public void deletePost(Long postId, String userName) {
+    public void deletePost(Long postId, String username) {
         Post post = findById(postId);
-        if (post.getUser().getEmail().equals(userName)) {
+        if (post.getUser().getEmail().equals(username)) {
             postRepository.delete(post);
         }
         else {
@@ -103,12 +104,13 @@ public class PostService {
 
     public Post findById(Long id) {
         return postRepository.findById(id).orElseThrow(() ->
-                new IllegalStateException("Post does not exits"));
+                new IllegalStateException(String.format("Post with ID:%s does not exist", id)));
     }
 
     public void addCommentator(Post post, User user) {
-        post.addCommentator(user);
-        postRepository.save(post);
+        if (post.addCommentator(user)) {
+            postRepository.save(post);
+        }
     }
 
 
@@ -173,6 +175,7 @@ public class PostService {
         postResponse.setPostType(post.getPostType());
         postResponse.setNumberOfComments(post.getComments().size());
 
+        //TODO maybe different methods for these
         if (post.getAnimalCharacteristics() != null) {
             postResponse.setAnimalType(post.getAnimalCharacteristics().getAnimalType());
             postResponse.setBreed(post.getAnimalCharacteristics().getBreed());

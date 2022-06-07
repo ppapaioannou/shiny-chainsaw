@@ -53,9 +53,9 @@ public class PostController {
         Pageable pageable = AppConstants.createPageableRequest(pageNo, pageSize, sortBy, sortDir);
         // if no user is logged in then don't display location information
         if (principal != null) {
-            return new ResponseEntity<>(postService.getAllPosts(pageable, Specification.where(specs), principal.getName()), HttpStatus.OK);
+            return new ResponseEntity<>(postService.getAllPosts(Specification.where(specs), pageable, principal.getName()), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(postService.getAllPosts(pageable, Specification.where(specs), ""), HttpStatus.OK);
+            return new ResponseEntity<>(postService.getAllPosts(Specification.where(specs), pageable, ""), HttpStatus.OK);
         }
 
     }
@@ -73,7 +73,7 @@ public class PostController {
 
     @PutMapping(path = "event/{postId}/attend")
     public ResponseEntity<String> willAttendEvent(@PathVariable Long postId, Principal principal) {
-        postService.willAttendEvent(postId, principal.getName());
+        postService.attendEvent(postId, principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

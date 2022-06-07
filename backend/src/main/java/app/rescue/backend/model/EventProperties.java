@@ -36,6 +36,10 @@ public class EventProperties {
         eventAttendees.add(user);
     }
 
+    public void removeEventAttendee(User user) {
+        eventAttendees.remove(user);
+    }
+
     public Collection<User> getEventAttendees() {
         return eventAttendees;
     }
