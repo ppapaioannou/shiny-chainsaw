@@ -227,7 +227,7 @@ class UserServiceTest {
         underTest.updateUserLocation(request, user.getEmail());
 
         // then
-        verify(locationService).userLocationToCircle(Double.parseDouble(request.getLatitude()),
+        verify(locationService).turnUserLocationToCircle(Double.parseDouble(request.getLatitude()),
                 Double.parseDouble(request.getLongitude()), Double.parseDouble(request.getDiameterInMeters()));
         verify(userRepository).save(any());
     }

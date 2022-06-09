@@ -125,7 +125,7 @@ public class AuthService {
                 double latitude = Double.parseDouble(request.getLatitude());
                 double longitude = Double.parseDouble(request.getLongitude());
                 double diameterInMeters = 40000;
-                Geometry orgLocation = locationService.userLocationToCircle(latitude, longitude, diameterInMeters);
+                Geometry orgLocation = locationService.turnUserLocationToCircle(latitude, longitude, diameterInMeters);
                 user.setLocation(orgLocation);
             }
 

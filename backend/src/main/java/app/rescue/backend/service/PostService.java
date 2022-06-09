@@ -124,7 +124,7 @@ public class PostService {
         if (!request.getLatitude().isEmpty() && !request.getLongitude().isEmpty()) {
             double latitude = Double.parseDouble(request.getLatitude());
             double longitude = Double.parseDouble(request.getLongitude());
-            Geometry postLocation = locationService.postLocationToPoint(latitude, longitude);
+            Geometry postLocation = locationService.turnPostLocationToPoint(latitude, longitude);
             post.setLocation(postLocation);
             post.setAddress(request.getAddress());
         }

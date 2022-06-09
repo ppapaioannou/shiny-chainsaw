@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LocationService {
 
-    public Geometry postLocationToPoint(double latitude, double longitude) {
+    public Geometry turnPostLocationToPoint(double latitude, double longitude) {
 
         GeometryFactory geometryFactory = new GeometryFactory();
         Coordinate coordinate = new Coordinate(latitude, longitude);
@@ -17,7 +17,7 @@ public class LocationService {
         return geometryFactory.createPoint(coordinate);
     }
 
-    public Geometry userLocationToCircle(double latitude, double longitude, double diameterInMeters) {
+    public Geometry turnUserLocationToCircle(double latitude, double longitude, double diameterInMeters) {
         GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
         shapeFactory.setNumPoints(32); // adjustable
         shapeFactory.setCentre(new Coordinate(latitude, longitude));
@@ -26,7 +26,7 @@ public class LocationService {
         // Length in meters of 1° of longitude = 40075 km * cos( latitude ) / 360
         shapeFactory.setHeight(diameterInMeters / (40075000 * Math.cos(Math.toRadians(latitude)) / 360));
 
-        return shapeFactory.createEllipse();
+        return shapeFactory.createCircle();
     }
 
     public double getDistanceFromPostInMeters(Geometry userLocation, Geometry postLocation) {

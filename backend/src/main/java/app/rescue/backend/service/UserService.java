@@ -106,7 +106,7 @@ public class UserService {
             double latitude = Double.parseDouble(request.getLatitude());
             double longitude = Double.parseDouble(request.getLongitude());
             double diameterInMeters = Double.parseDouble(request.getDiameterInMeters());
-            user.setLocation(locationService.userLocationToCircle(latitude, longitude, diameterInMeters));
+            user.setLocation(locationService.turnUserLocationToCircle(latitude, longitude, diameterInMeters));
             userRepository.save(user);
         }
     }
