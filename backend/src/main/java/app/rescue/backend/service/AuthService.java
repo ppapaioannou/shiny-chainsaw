@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.time.LocalDateTime;
 
 @Service
@@ -46,7 +47,7 @@ public class AuthService {
         this.emailSender = emailSender;
     }
 
-    public User register(RegistrationDto request, String userRole) {
+    public User register(RegistrationDto request, String userRole) throws MessagingException {
         boolean isValidEmail = emailValidator.check(request.getEmail());
 
         if (!isValidEmail) {

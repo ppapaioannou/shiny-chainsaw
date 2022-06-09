@@ -1,8 +1,6 @@
 package app.rescue.backend.service;
 
 import app.rescue.backend.utility.EmailSender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -14,8 +12,6 @@ import javax.mail.internet.MimeMessage;
 @Service
 public class EmailService implements EmailSender {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
-
     private final JavaMailSender mailSender;
 
     public EmailService(JavaMailSender mailSender) {
@@ -24,26 +20,20 @@ public class EmailService implements EmailSender {
 
     @Override
     @Async
-    public void send(String toEmail, String recipientName, String link) {
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-            helper.setTo(toEmail);
-            if (link.contains("confirm")) {
-                helper.setText(confirmAccountEmail(recipientName, link), true);
-                helper.setSubject("Confirm your email");
-            }
-            else if (link.contains("ref")) {
-                helper.setText(invitationEmail(recipientName, link), true);
-                helper.setSubject("Come join Rescue!");
-            }
-
-            helper.setFrom("rescue@example.com");
-            mailSender.send(mimeMessage);
-        } catch (MessagingException e) {
-            LOGGER.error("failed to send email", e);
-            throw new IllegalStateException("failed to send email");
+    public void send(String recipient, String name, String link) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+        helper.setTo(recipient);
+        if (link.contains("confirm")) {
+            helper.setText(confirmAccountEmail(name, link), true);
+            helper.setSubject("Confirm your email");
         }
+        else if (link.contains("ref")) {
+            helper.setText(invitationEmail(name, link), true);
+            helper.setSubject("Come join Rescue!");
+        }
+        helper.setFrom("rescue@example.com");
+        mailSender.send(mimeMessage);
     }
 
     private String confirmAccountEmail(String recipientName, String confirmationLink) {
@@ -115,7 +105,7 @@ public class EmailService implements EmailSender {
                 "</div></div>";
     }
 
-    private String invitationEmail(String recipientName, String registrationLink) {
+    private String invitationEmail(String senderName, String registrationLink) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
                 "\n" +
                 "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>\n" +
@@ -171,7 +161,7 @@ public class EmailService implements EmailSender {
                 "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
                 "      <td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">\n" +
                 "        \n" +
-                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hello, your friend " + recipientName + " invited you to join Rescue</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Rescue is an online platform dedicated to bla bla  bla. Please click on the below link to register and join the community: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\"" + registrationLink + "\">Join Now</a> </p></blockquote>\n <p>See you soon</p>" +
+                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hello, your friend " + senderName + " invited you to join Rescue</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Rescue is an online platform dedicated to bla bla  bla. Please click on the below link to register and join the community: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\"" + registrationLink + "\">Join Now</a> </p></blockquote>\n <p>See you soon</p>" +
                 "        \n" +
                 "      </td>\n" +
                 "      <td width=\"10\" valign=\"middle\"><br></td>\n" +

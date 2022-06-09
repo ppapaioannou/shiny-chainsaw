@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -34,7 +35,7 @@ public class AuthController {
     public ResponseEntity<String> register(@RequestParam("payload") RegistrationDto request,
                                            @RequestParam(value = "file", required = false) MultipartFile profileImage,
                                            @PathVariable String userRole,
-                                           @PathVariable(required = false) String referralToken) throws IOException {
+                                           @PathVariable(required = false) String referralToken) throws IOException, MessagingException {
         User newUser = authService.register(request, userRole.toUpperCase(Locale.ROOT));
 
         imageService.storeProfileImage(newUser, profileImage);

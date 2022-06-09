@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.mail.MessagingException;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -146,7 +147,7 @@ class UserServiceTest {
     }
 
     @Test
-    void canInviteFriend() {
+    void canInviteFriend() throws MessagingException {
         // given
         String username = "user@example.com";
         String email = "random@email.com";
@@ -164,7 +165,7 @@ class UserServiceTest {
     }
 
     @Test
-    void inviteFriendWillTrowWhenEmailIsNotValid() {
+    void inviteFriendWillTrowWhenEmailIsNotValid() throws MessagingException {
         // given
         String username = "user@example.com";
         String email = "random@email.com";

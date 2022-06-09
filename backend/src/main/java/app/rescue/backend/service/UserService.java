@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.List;
@@ -77,7 +78,7 @@ public class UserService {
         userRepository.enableUser(email);
     }
 
-    public void inviteFriend(String email, String username) {
+    public void inviteFriend(String email, String username) throws MessagingException {
         boolean isValidEmail = emailValidator.check(email);
 
         if (!isValidEmail) {

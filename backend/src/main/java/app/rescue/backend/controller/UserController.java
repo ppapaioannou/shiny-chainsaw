@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
@@ -31,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping(path = "ref/{email}")
-    public HttpStatus inviteFriend(@PathVariable String email, Principal principal) {
+    public HttpStatus inviteFriend(@PathVariable String email, Principal principal) throws MessagingException {
         userService.inviteFriend(email, principal.getName());
         return HttpStatus.OK;
     }
