@@ -12,11 +12,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -60,6 +62,8 @@ class ConfirmationTokenServiceTest {
     void canGetToken() {
         // given
         String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken = mock(ConfirmationToken.class);
+        given(confirmationTokenRepository.findByToken(token)).willReturn(Optional.of(confirmationToken));
 
         // when
         underTest.getToken(token);
