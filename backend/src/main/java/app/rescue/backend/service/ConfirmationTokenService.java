@@ -20,8 +20,9 @@ public class ConfirmationTokenService {
         confirmationTokenRepository.save(token);
     }
 
-    public Optional<ConfirmationToken> getToken(String token) {
-        return confirmationTokenRepository.findByToken(token);
+    public ConfirmationToken getToken(String token) {
+        return confirmationTokenRepository.findByToken(token).orElseThrow(() ->
+                new IllegalStateException("token not found"));
     }
 
     public void setConfirmedAt(String token) {

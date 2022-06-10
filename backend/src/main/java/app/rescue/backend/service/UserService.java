@@ -79,9 +79,7 @@ public class UserService {
     }
 
     public void inviteFriend(String email, String username) throws MessagingException {
-        boolean isValidEmail = emailValidator.check(email);
-
-        if (!isValidEmail) {
+        if (!emailValidator.isValidEmail(email)) {
             throw new IllegalStateException("email not valid");
         }
         User user = getUserByEmail(username);
@@ -153,6 +151,10 @@ public class UserService {
 
     public boolean tryToFindUserById(Long id) {
         return userRepository.findById(id).isPresent();
+    }
+
+    public boolean isUserEnabled(String email) {
+        return userRepository.existsByEmailAndEnabled(email, true);
     }
 
     public User findByReferralToken(String referralToken) {

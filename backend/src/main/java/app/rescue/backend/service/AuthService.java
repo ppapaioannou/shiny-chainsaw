@@ -48,9 +48,7 @@ public class AuthService {
     }
 
     public User register(RegistrationDto request, String userRole) throws MessagingException {
-        boolean isValidEmail = emailValidator.check(request.getEmail());
-
-        if (!isValidEmail) {
+        if (!emailValidator.isValidEmail(request.getEmail())) {
             throw new IllegalStateException("email not valid");
         }
         User newUser = mapFromRequestToUser(request, userRole);
@@ -70,7 +68,7 @@ public class AuthService {
     }
 
     public AuthenticationDto login(LoginDto request) {
-        if (!userService.getUserByEmail(request.getEmail()).isEnabled()) {
+        if (!userService.isUserEnabled(request.getEmail())) {
             throw new IllegalStateException("User is not enabled, check your emails");
         }
         Authentication authenticate = authenticationManager.authenticate(
@@ -78,12 +76,14 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         String authenticationToken = jwtProvider.generateToken(authenticate);
         User user = userService.getUserByEmail(request.getEmail());
-        return new AuthenticationDto(authenticationToken, request.getEmail(), user.getId(), user.getUserRole().toString());
+        return new AuthenticationDto(authenticationToken,
+                request.getEmail(),
+                user.getId(),
+                user.getUserRole().toString());
     }
 
     public String confirmToken(String token) {
-        ConfirmationToken confirmationToken = confirmationTokenService.getToken(token).orElseThrow(() ->
-                new IllegalStateException("token not found"));
+        ConfirmationToken confirmationToken = confirmationTokenService.getToken(token);
 
         if (confirmationToken.getConfirmedAt() != null) {
             throw new IllegalStateException("email already confirmed");

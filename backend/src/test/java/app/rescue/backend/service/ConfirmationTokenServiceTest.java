@@ -15,7 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,6 +66,19 @@ class ConfirmationTokenServiceTest {
 
         // then
         verify(confirmationTokenRepository).findByToken(any());
+
+    }
+
+    @Test
+    void getTokenWillThrowWhenTokenNotFound() {
+        // given
+        String token = UUID.randomUUID().toString();
+
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.getToken(token))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("token not found");
 
     }
 

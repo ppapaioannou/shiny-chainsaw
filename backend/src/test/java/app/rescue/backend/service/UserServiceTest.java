@@ -154,7 +154,7 @@ class UserServiceTest {
         User user = getUser(username, Role.INDIVIDUAL);
         String confirmationLink = "http://localhost:4200/register/individual/ref/"+ user.getReferralToken().strip();
 
-        given(emailValidator.check(email)).willReturn(true);
+        given(emailValidator.isValidEmail(email)).willReturn(true);
         given(userRepository.findByEmail(username)).willReturn(Optional.of(user));
 
         // when
@@ -172,7 +172,7 @@ class UserServiceTest {
         User user = getUser(username, Role.INDIVIDUAL);
         String confirmationLink = "http://localhost:4200/register/individual/ref/"+ user.getReferralToken().strip();
 
-        given(emailValidator.check(anyString())).willReturn(false);
+        given(emailValidator.isValidEmail(anyString())).willReturn(false);
 
         // when
         // then
@@ -356,6 +356,12 @@ class UserServiceTest {
     }
 
     @Test
+    void isUserEnabled() {
+        underTest.isUserEnabled("email");
+        verify(userRepository).existsByEmailAndEnabled("email", true);
+    }
+
+    @Test
     void findByReferralToken() {
         // given
         User user = mock(User.class);
@@ -399,5 +405,4 @@ class UserServiceTest {
         user.setUserRole(role);
         return user;
     }
-
 }
