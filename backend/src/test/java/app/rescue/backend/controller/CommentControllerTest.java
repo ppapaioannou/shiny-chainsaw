@@ -99,7 +99,7 @@ class CommentControllerTest {
                 .isEqualTo(request);
 
         List<NotificationDto> notifications = notificationService.getAllNotifications(postOwner.getEmail());
-        assertThat(notifications.get(0).getSender()).isEqualTo(commentator.getName());
+        assertThat(notifications.get(0).getSenderName()).isEqualTo(commentator.getName());
         assertThat(notifications.get(0).getText()).contains("There is a new comment on your post");
     }
 

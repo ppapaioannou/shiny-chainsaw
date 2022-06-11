@@ -174,8 +174,8 @@ public class NotificationService {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
         NotificationDto notificationResponse = new NotificationDto();
-        notificationResponse.setId(notification.getId().toString());
-        notificationResponse.setSender(userService.getUserById(notification.getSenderId()).getName());
+        notificationResponse.setId(notification.getId());
+        notificationResponse.setSenderName(userService.getUserById(notification.getSenderId()).getName());
         if (notification.getPost() != null) {
             notificationResponse.setPost(notification.getPost().getTitle());
         }

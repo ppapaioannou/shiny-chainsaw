@@ -113,7 +113,7 @@ class AuthControllerTest {
         assertThat(connections.get(0).getConnectionStatus()).isEqualTo("REF-PENDING");
 
         List<NotificationDto> notifications = notificationService.getAllNotifications(existingUser.getEmail());
-        assertThat(notifications.get(0).getSender()).isEqualTo(user.getName());
+        assertThat(notifications.get(0).getSenderName()).isEqualTo(user.getName());
         assertThat(notifications.get(0).getText()).contains("Your friend created a Rescue account, " +
                 "when they enable their account you two will be automatically connected");
     }
