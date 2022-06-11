@@ -122,7 +122,7 @@ class NotificationControllerTest {
     }
 
     @Test
-    void deleteNotification() throws Exception {
+    void canDeleteNotification() throws Exception {
         // given
         Notification notification = createNotification(user, "1", sender);
 

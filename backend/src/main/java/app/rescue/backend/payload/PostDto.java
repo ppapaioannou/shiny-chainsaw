@@ -10,7 +10,6 @@ public class PostDto {
     private String body;
     private String postType;
     private String createdAt;
-    private Boolean enableComments;
     private int numberOfComments;
     private String date;
     private String thumbnail;
