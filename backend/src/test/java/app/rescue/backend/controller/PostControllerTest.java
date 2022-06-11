@@ -293,7 +293,7 @@ class PostControllerTest {
     }
 
     @Test
-    void deletePost() throws Exception {
+    void canDeletePost() throws Exception {
         // given
         Post post = getPost(postOwner);
         assertThat(postRepository.existsById(post.getId())).isTrue();

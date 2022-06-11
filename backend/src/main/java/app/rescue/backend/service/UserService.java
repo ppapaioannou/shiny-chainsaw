@@ -191,7 +191,7 @@ public class UserService {
 
     private UserDto mapFromUserToResponse(User user) {
         UserDto response = new UserDto();
-        response.setId(user.getId().toString());
+        response.setId(user.getId());
         response.setName(user.getName());
         response.setAccountType(user.getUserRole().name());
         response.setEmail(user.getEmail());
