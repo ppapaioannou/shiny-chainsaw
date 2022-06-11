@@ -109,9 +109,9 @@ class UserServiceTest {
     @Test
     void signUpUserWillTrowWhenEmailIsTaken() {
         // given
-        User user = getUser("user@example.com", Role.INDIVIDUAL);
-        given(userRepository.existsByEmail(anyString())).willReturn(true);
-        given(userRepository.existsByEmailAndEnabled(anyString(), anyBoolean())).willReturn(true);
+        User user = mock(User.class);
+        given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
+        given(user.isEnabled()).willReturn(true);
 
         // when
         // then
@@ -126,8 +126,7 @@ class UserServiceTest {
     void signUpUserWillDeleteUserWhenNotEnabled() {
         // given
         User user = getUser("user@example.com", Role.INDIVIDUAL);
-        given(userRepository.existsByEmail(anyString())).willReturn(true);
-        given(userRepository.existsByEmailAndEnabled(anyString(), anyBoolean())).willReturn(false);
+        given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
 
         // when
         underTest.signUpUser(user);
@@ -331,25 +330,25 @@ class UserServiceTest {
     }
 
     @Test
-    void tryToFindUserByIdAndSucceed() {
+    void doesExistsById() {
         // given
         User user = mock(User.class);
-        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(userRepository.existsById(user.getId())).willReturn(true);
 
         // when
-        Boolean actual = underTest.tryToFindUserById(user.getId());
+        Boolean actual = underTest.existsById(user.getId());
 
         // then
         assertThat(actual).isTrue();
     }
 
     @Test
-    void tryToFindUserByIdAndFail() {
+    void doesNotExistById() {
         // given
         User user = mock(User.class);
 
         // when
-        Boolean actual = underTest.tryToFindUserById(user.getId());
+        Boolean actual = underTest.existsById(user.getId());
 
         // then
         assertThat(actual).isFalse();

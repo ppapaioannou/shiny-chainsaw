@@ -91,7 +91,7 @@ class UserRepositoryTest {
         Optional<User> actual = underTest.findByReferralToken(UUID.randomUUID().toString());
         assertThat(actual).isNotPresent();
     }
-
+/*
     @Test
     void existsByEmail() {
         boolean actual = underTest.existsByEmail(expected.getEmail());
@@ -103,7 +103,7 @@ class UserRepositoryTest {
         boolean actual = underTest.existsByEmail(new User().getEmail());
         assertThat(actual).isFalse();
     }
-
+*/
     @Test
     void existsByEmailAndEnabled() {
         underTest.enableUser(expected.getEmail());

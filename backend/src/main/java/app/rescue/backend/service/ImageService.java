@@ -63,7 +63,13 @@ public class ImageService {
         }
         else {
             if (user.getUserRole().equals(Role.INDIVIDUAL)) {
-                String path = "backend/src/main/resources/images/Individual-Illustration-1.png";
+                String path = "src/main/resources/images/Individual-Illustration-1.png";
+
+                // tests start from their own folder and always add backend to the path
+                // so the get the correct path always we will add it manually if the call
+                // comes from the main application
+                path = testSanityCheck(path);
+
                 BufferedImage bImage = ImageIO.read(new File(path));
                 ByteArrayOutputStream byteOutS = new ByteArrayOutputStream();
                 ImageIO.write(bImage, "png", byteOutS);
@@ -72,6 +78,12 @@ public class ImageService {
             }
             else if (user.getUserRole().equals(Role.ORGANIZATION)) {
                 String path = "backend/src/main/resources/images/Organization-Illustration-1.png";
+
+                // tests start from their own folder and always add backend to the path
+                // so the get the correct path always we will add it manually if the call
+                // comes from the main application
+                path = testSanityCheck(path);
+
                 BufferedImage bImage = ImageIO.read(new File(path));
                 ByteArrayOutputStream byteOutS = new ByteArrayOutputStream();
                 ImageIO.write(bImage, "png", byteOutS);
@@ -107,17 +119,25 @@ public class ImageService {
         }
     }
 
-    private ImageDto mapFromImageToResponse(Image image) {
-        String fileDownloadUri = createFileDownloadUri(image);
-        return new ImageDto(image.getName(), fileDownloadUri, image.getType(), image.getData().length);
-    }
-
     public String createFileDownloadUri(Image image) {
         return ServletUriComponentsBuilder
                 .fromCurrentContextPath()
                 .path("/api/v1/images/image/")
                 .path(String.valueOf(image.getId()))
                 .toUriString();
+    }
+
+    private ImageDto mapFromImageToResponse(Image image) {
+        String fileDownloadUri = createFileDownloadUri(image);
+        return new ImageDto(image.getName(), fileDownloadUri, image.getType(), image.getData().length);
+    }
+
+    private String testSanityCheck(String path) throws IOException {
+        String test = new File(path).getCanonicalPath();
+        if (!test.contains("backend")) {
+            path = "backend/" + path;
+        }
+        return path;
     }
 
 }

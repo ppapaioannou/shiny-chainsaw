@@ -18,6 +18,7 @@ import javax.mail.MessagingException;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,12 +54,15 @@ public class UserService {
     }
 
     public String signUpUser(User newUser) {
-        if (userRepository.existsByEmail(newUser.getEmail())) {
-            if (userRepository.existsByEmailAndEnabled(newUser.getEmail(), true)) {
+        Optional<User> existingUser = userRepository.findByEmail(newUser.getEmail());
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            if (user.isEnabled()) {
                 throw new IllegalStateException("User with that email already exists");
             }
-            userRepository.delete(newUser);
+            userRepository.delete(user);
         }
+
         String encodedPassword = passwordEncoder.encode(newUser.getPassword());
         newUser.setPassword(encodedPassword);
 
@@ -149,8 +153,8 @@ public class UserService {
                 new IllegalStateException(String.format("User with ID:%s does not exist", id)));
     }
 
-    public boolean tryToFindUserById(Long id) {
-        return userRepository.findById(id).isPresent();
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
     }
 
     public boolean isUserEnabled(String email) {

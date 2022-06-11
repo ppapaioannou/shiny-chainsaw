@@ -101,13 +101,11 @@ class CommentControllerTest {
         List<NotificationDto> notifications = notificationService.getAllNotifications(postOwner.getEmail());
         assertThat(notifications.get(0).getSender()).isEqualTo(commentator.getName());
         assertThat(notifications.get(0).getText()).contains("There is a new comment on your post");
-
-        System.out.println(comments.get(0).getId());
     }
 
     @Test
     void canGetAllPostComments() throws Exception {
-        // given\
+        // given
         List<Comment> expected = new ArrayList<>();
         expected.add(addComment(commentator, post));
         expected.add(addComment(postOwner, post));
@@ -138,7 +136,6 @@ class CommentControllerTest {
             assertEquals(expected.get(i).getUser().getId(), actual.get(i).getUserId());
             assertEquals(expected.get(i).getUser().getName(), actual.get(i).getUserName());
         }
-        System.out.println(actual.get(0).getId());
     }
 
     @Test
@@ -146,8 +143,7 @@ class CommentControllerTest {
         // given
         Long commentId = addComment(commentator, post).getId();
 
-        assertThat(commentRepository.findAll().size()).isEqualTo(1);
-        System.out.println(commentId);
+        assertThat(commentRepository.existsById(commentId)).isTrue();
 
         // when
         mvc.perform(delete("/api/v1/comment/"+commentId+"/delete")
@@ -156,8 +152,7 @@ class CommentControllerTest {
                 .andExpect(status().isOk());
 
         // then
-        assertThat(commentRepository.findAll().size()).isEqualTo(0);
-
+        assertThat(commentRepository.existsById(commentId)).isFalse();
     }
 
     private CommentDto getCommentDto(Long postId, User user) {

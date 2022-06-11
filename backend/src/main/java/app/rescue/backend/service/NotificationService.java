@@ -121,7 +121,7 @@ public class NotificationService {
     private Collection<User> sendConnectionNotifications(Post post) {
         Collection<User> notified = new HashSet<>();
         for (Connection connection : connectionService.findConnectionsByUser(post.getUser())) {
-            if (userService.tryToFindUserById(connection.getConnectedToId())) {
+            if (userService.existsById(connection.getConnectedToId())) {
                 Notification newPostNotification = new Notification();
                 newPostNotification.setUser(userService.getUserById(connection.getConnectedToId()));
                 newPostNotification.setSenderId(connection.getUser().getId());

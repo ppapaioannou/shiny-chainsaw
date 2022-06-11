@@ -13,7 +13,6 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        #dialect: MySQL5InnoDBDialect
         format_sql: true
     #show-sql: true
     open-in-view: true
