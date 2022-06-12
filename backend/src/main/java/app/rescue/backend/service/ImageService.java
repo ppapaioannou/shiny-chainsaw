@@ -47,7 +47,7 @@ public class ImageService {
 
     public Image getImage(Long imageId) {
         return imageRepository.findById(imageId).orElseThrow(() ->
-                new IllegalStateException("Image does not exits"));
+                new IllegalStateException("Image does not exist"));
     }
 
     public Image getProfileImage(User user) {
@@ -62,7 +62,9 @@ public class ImageService {
             image = new Image(user, fileName, file.getContentType(), file.getBytes());
         }
         else {
-            if (user.getUserRole().equals(Role.INDIVIDUAL)) {
+            if (user
+                    .getUserRole()
+                    .equals(Role.INDIVIDUAL)) {
                 String path = "src/main/resources/images/Individual-Illustration-1.png";
 
                 // tests start from their own folder and always add backend to the path
@@ -105,8 +107,6 @@ public class ImageService {
             imageRepository.delete(currentImage);
             storeProfileImage(user, file);
         }
-
-
     }
 
     public void storePostImages(Post post, MultipartFile[] files) throws IOException {

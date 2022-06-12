@@ -188,13 +188,7 @@ public class ConnectionService {
         }
 
         Image profileImage = imageService.getProfileImage(user);
-
-        String profileImageLink = ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .path("/api/v1/images/image/")
-                .path(String.valueOf(profileImage.getId()))
-                .toUriString();
-        response.setProfileImage(profileImageLink);
+        response.setProfileImage(imageService.createFileDownloadUri(profileImage));
 
         return response;
     }
