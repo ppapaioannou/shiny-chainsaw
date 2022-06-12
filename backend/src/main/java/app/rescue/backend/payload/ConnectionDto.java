@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ConnectionDto {
-    private String userId;
+    private Long userId;
     private String name;
     private String profileImage;
 

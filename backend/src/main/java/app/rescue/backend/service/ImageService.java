@@ -77,7 +77,7 @@ public class ImageService {
                 image = new Image(user, "Individual-Illustration-1", "image/png", imageInByte);
             }
             else if (user.getUserRole().equals(Role.ORGANIZATION)) {
-                String path = "backend/src/main/resources/images/Organization-Illustration-1.png";
+                String path = "src/main/resources/images/Organization-Illustration-1.png";
 
                 // tests start from their own folder and always add backend to the path
                 // so the get the correct path always we will add it manually if the call

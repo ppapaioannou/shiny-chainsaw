@@ -185,7 +185,7 @@ public class ConnectionService {
             user = connection.getUser();
         }
 
-        response.setUserId(user.getId().toString());
+        response.setUserId(user.getId());
         response.setName(user.getName());
         if (user.getUserRole().equals(Role.INDIVIDUAL)) {
             response.setLastName(user.getIndividualInformation().getLastName());
