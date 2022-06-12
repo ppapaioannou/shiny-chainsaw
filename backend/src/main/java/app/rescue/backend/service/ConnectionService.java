@@ -3,7 +3,6 @@ package app.rescue.backend.service;
 import app.rescue.backend.model.*;
 import app.rescue.backend.payload.ConnectionDto;
 import app.rescue.backend.repository.ConnectionRepository;
-import app.rescue.backend.repository.ImageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -18,13 +17,12 @@ public class ConnectionService {
 
     private final UserService userService;
 
-    //TODO imageRepository to imageService
-    private final ImageRepository imageRepository;
+    private final ImageService imageService;
 
-    public ConnectionService(ConnectionRepository connectionRepository, UserService userService, ImageRepository imageRepository) {
+    public ConnectionService(ConnectionRepository connectionRepository, UserService userService, ImageService imageService) {
         this.connectionRepository = connectionRepository;
         this.userService = userService;
-        this.imageRepository = imageRepository;
+        this.imageService = imageService;
     }
 
     public Connection connectWith(Long userId, String username) {
@@ -113,28 +111,26 @@ public class ConnectionService {
     public void completeRefConnection(User user) {
         Optional<Connection> connection = connectionRepository.findRefPendingConnection(user);
         if (connection.isPresent()) {
-            User connectedTo = userService.getUserById(connection.get().getConnectedToId());
-            if (connectedTo.getUserRole().equals(Role.INDIVIDUAL)) {
-                connectionRepository.completeConnection(user, connectedTo.getId());
-                connectionRepository.completeConnection(connectedTo, user.getId());
+            User connectedToUser = userService.getUserById(connection.get().getConnectedToId());
+            if (connectedToUser.getUserRole().equals(Role.INDIVIDUAL)) {
+                connectionRepository.completeConnection(user, connectedToUser.getId());
+                connectionRepository.completeConnection(connectedToUser, user.getId());
             }
-            else if (connectedTo.getUserRole().equals(Role.ORGANIZATION)) {
-                // TODO check if this is working
+            else if (connectedToUser.getUserRole().equals(Role.ORGANIZATION)) {
                 connectionRepository.completeRefOrgConnection(user);
             }
         }
     }
 
-    public void deleteConnection(Long userId, String userName) {
+    public void deleteConnection(Long connectedToUserId, String userName) {
         User user = userService.getUserByEmail(userName);
-        User connectedToUser = userService.getUserById(userId);
+        User connectedToUser = userService.getUserById(connectedToUserId);
 
-        Optional<Connection> connection1 = connectionRepository.findConnectionByUserAndConnectedToId(user, userId);
+        Optional<Connection> connection1 = connectionRepository.findConnectionByUserAndConnectedToId(user, connectedToUserId);
         if (connection1.isPresent()) {
             connectionRepository.delete(connection1.get());
             Optional<Connection> connection2 = connectionRepository.findConnectionByUserAndConnectedToId(connectedToUser, user.getId());
             connection2.ifPresent(connectionRepository::delete);
-
         }
     }
 
@@ -191,9 +187,7 @@ public class ConnectionService {
             response.setLastName(user.getIndividualInformation().getLastName());
         }
 
-
-        //TODO method to get profile image
-        Image profileImage = imageRepository.findByUserAndProfileImage(user, true);
+        Image profileImage = imageService.getProfileImage(user);
 
         String profileImageLink = ServletUriComponentsBuilder
                 .fromCurrentContextPath()

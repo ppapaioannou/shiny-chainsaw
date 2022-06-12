@@ -158,6 +158,17 @@ class ConnectionRepositoryTest {
     }
 
     @Test
+    void findRefFollowerConnection() {
+        Connection expected = new Connection(user1, user2.getId(), "REF-FOLLOWER");
+        underTest.save(expected);
+
+        Optional<Connection> actual = underTest.findRefPendingConnection(user1);
+
+        assertThat(actual).isPresent();
+        assertEquals(expected.getId(), actual.get().getId());
+    }
+
+    @Test
     void notFindRefPendingConnection() {
         Optional<Connection> actual = underTest.findRefPendingConnection(user1);
 
