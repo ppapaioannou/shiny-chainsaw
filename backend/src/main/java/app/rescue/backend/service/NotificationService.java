@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
-    //TODO REWORK
-
     private final NotificationRepository notificationRepository;
 
     private final UserService userService;
@@ -40,8 +38,6 @@ public class NotificationService {
             connectionNotification.setText("New Follower");
             connectionNotification.setNotificationType("CONNECTION-FOLLOWER");
         }
-
-
         notificationRepository.save(connectionNotification);
     }
 
@@ -87,15 +83,15 @@ public class NotificationService {
         sendAdditionalCommentNotifications(comment);
     }
 
-    public List<NotificationDto> getAllNotifications(String name) {
-        User user = userService.getUserByEmail(name);
+    public List<NotificationDto> getAllNotifications(String username) {
+        User user = userService.getUserByEmail(username);
         List<Notification> notifications = notificationRepository.findAllByUserOrderByIdDesc(user);
         return notifications.stream().map(this::mapFromNotificationToResponse).collect(Collectors.toList());
     }
 
-    public void readNotification(Long notificationId, String name) {
+    public void readNotification(Long notificationId, String username) {
         Notification notification = getNotificationById(notificationId);
-        if (notification.getUser().getEmail().equals(name)) {
+        if (notification.getUser().getEmail().equals(username)) {
             notificationRepository.notificationRead(notification, LocalDateTime.now());
         }
         else {
@@ -103,9 +99,9 @@ public class NotificationService {
         }
     }
 
-    public void deleteNotification(Long notificationId, String name) {
+    public void deleteNotification(Long notificationId, String username) {
         Notification notification = getNotificationById(notificationId);
-        if (notification.getUser().getEmail().equals(name)) {
+        if (notification.getUser().getEmail().equals(username)) {
             notificationRepository.delete(notification);
         }
         else {
