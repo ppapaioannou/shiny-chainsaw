@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.in;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -364,6 +365,24 @@ class ConnectionControllerTest {
         // then
         assertThat(connectionRepository.findConnectionByUserAndConnectedToId(individual, otherIndividual.getId())).isPresent();
         assertThat(connectionRepository.findConnectionByUserAndConnectedToId(otherIndividual, individual.getId())).isPresent();
+    }
+
+    @Test
+    void canDeclineConnection() throws Exception {
+        //given
+        getConnection(otherIndividual, individual, "PENDING");
+
+        assertThat(connectionRepository.findConnectionByUserAndConnectedToId(otherIndividual, individual.getId())).isPresent();
+
+        //when
+        mvc.perform(delete("/api/v1/connection/decline/" + otherIndividual.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(individualMockPrincipal))
+                .andExpect(status().isOk());
+
+        // then
+        assertThat(connectionRepository.findConnectionByUserAndConnectedToId(individual, otherIndividual.getId())).isNotPresent();
+        assertThat(connectionRepository.findConnectionByUserAndConnectedToId(otherIndividual, individual.getId())).isNotPresent();
     }
 
     @Test

@@ -66,7 +66,6 @@ public class ConnectionService {
         return connections.stream().map(connection -> mapFromConnectionToResponse(connection, getConnectedToUser)).collect(Collectors.toList());
     }
 
-    //TODO CHECK EVERYTHING BELOW
     public Boolean isConnectedTo(Long connectedToId, String username) {
         User user = userService.getUserByEmail(username);
         return alreadyConnected(user, userService.getUserById(connectedToId));
@@ -95,6 +94,16 @@ public class ConnectionService {
 
         connectionRepository.completeConnection(connectedToUser, user.getId());
         return connection;
+    }
+
+    public void declineConnection(Long userId, String username) {
+        User user = userService.getUserByEmail(username);
+
+        User connectedToUser = userService.getUserById(userId);
+
+        Optional<Connection> connection = connectionRepository.findConnectionByUserAndConnectedToId(connectedToUser, user.getId());
+
+        connection.ifPresent(connectionRepository::delete);
     }
 
     public void invitationRegistration(User newUser, User invitedByUser) {

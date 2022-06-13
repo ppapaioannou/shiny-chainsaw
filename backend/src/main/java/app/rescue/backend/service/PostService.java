@@ -91,8 +91,6 @@ public class PostService {
 
     }
 
-    //TODO public void willNotAttendEvent
-
     public void deletePost(Long postId, String username) {
         Post post = findById(postId);
         if (post.getUser().getEmail().equals(username)) {

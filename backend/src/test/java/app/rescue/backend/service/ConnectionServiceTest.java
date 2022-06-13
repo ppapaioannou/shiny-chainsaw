@@ -391,6 +391,30 @@ class ConnectionServiceTest {
                 .hasMessageContaining("This user can not accept connection requests");
     }
 
+    @Test
+    void canDeclineConnection() {
+        // given
+        Long connectedToId = 0L;
+        String username = "user@example.com";
+
+        User user = mock(User.class);
+        User connectedToUser = mock(User.class);
+
+        Connection connection = mock(Connection.class);
+
+        given(user.getId()).willReturn(1L);
+        given(userService.getUserByEmail(username)).willReturn(user);
+        given(userService.getUserById(connectedToId)).willReturn(connectedToUser);
+        given(connectionRepository.findConnectionByUserAndConnectedToId(connectedToUser, user.getId()))
+                .willReturn(Optional.of(connection));
+
+        // when
+        underTest.declineConnection(connectedToId, username);
+
+        // then
+        verify(connectionRepository).delete(any());
+    }
+
 
 
     @Test

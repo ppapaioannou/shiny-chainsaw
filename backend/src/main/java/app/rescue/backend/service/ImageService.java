@@ -56,7 +56,6 @@ public class ImageService {
         return imageRepository.findByUserAndProfileImage(user, true);
     }
 
-    //TODO CHECK EVERYTHING BELOW
     public void storeProfileImage(User user, MultipartFile file) throws IOException {
         Image image;
         if (file != null) {

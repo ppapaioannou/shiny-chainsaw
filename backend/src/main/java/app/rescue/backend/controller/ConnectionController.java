@@ -47,6 +47,12 @@ public class ConnectionController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @DeleteMapping(path="decline/{userId}")
+    public ResponseEntity<String> declineConnection(@PathVariable Long userId, Principal principal) {
+        connectionService.declineConnection(userId, principal.getName());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @DeleteMapping(path="delete/{userId}")
     public ResponseEntity<String> deleteConnection(@PathVariable Long userId, Principal principal) {
         connectionService.deleteConnection(userId, principal.getName());
