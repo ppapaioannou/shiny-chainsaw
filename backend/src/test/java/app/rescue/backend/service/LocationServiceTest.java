@@ -70,7 +70,7 @@ class LocationServiceTest {
         // an approximation is good enough
         assertEquals(expectedLatitude, actualLatitude, 0.00001);
         assertEquals(expectedLongitude, actualLongitude, 0.00001);
-        assertEquals(expectedDiameterInMeters, actualDiameterInMeters, 0.001);
+        assertEquals(expectedDiameterInMeters, actualDiameterInMeters, 0.01);
     }
 
     @Test

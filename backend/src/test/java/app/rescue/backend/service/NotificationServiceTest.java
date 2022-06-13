@@ -153,6 +153,7 @@ class NotificationServiceTest {
         userConnections.add(connection);
 
         given(post.getUser()).willReturn(postOwner);
+        given(post.getPostType()).willReturn("test");
         given(connectionService.findConnectionsByUser(postOwner)).willReturn(userConnections);
         given(connection.getUser()).willReturn(connectedToUser);
         given(userService.existsById(connection.getConnectedToId())).willReturn(true);
@@ -167,7 +168,7 @@ class NotificationServiceTest {
 
         Notification capturedNotification = notificationArgumentCaptor.getValue();
 
-        assertEquals("There is a new post from your connections", capturedNotification.getText());
+        assertEquals("There is a new " + post.getPostType().toUpperCase() + " post from your connections", capturedNotification.getText());
         assertEquals("POST-CONNECTIONS", capturedNotification.getNotificationType());
     }
 
@@ -187,6 +188,7 @@ class NotificationServiceTest {
         users.add(nearUser);
 
         given(post.getUser()).willReturn(postOwner);
+        given(post.getPostType()).willReturn("test");
         given(userService.findAll()).willReturn(users);
         given(nearUser.getLocation()).willReturn(nearUserLocation);
         given(post.getLocation()).willReturn(postLocation);
@@ -202,7 +204,7 @@ class NotificationServiceTest {
 
         Notification capturedNotification = notificationArgumentCaptor.getValue();
 
-        assertEquals("There is a new post near you", capturedNotification.getText());
+        assertEquals("There is a new " + post.getPostType().toUpperCase() + " post near you", capturedNotification.getText());
         assertEquals("POST-PROXIMITY", capturedNotification.getNotificationType());
     }
 

@@ -4,6 +4,7 @@ import app.rescue.backend.model.Post;
 import app.rescue.backend.model.Role;
 import app.rescue.backend.model.User;
 import app.rescue.backend.payload.PostDto;
+import app.rescue.backend.payload.RegistrationDto;
 import app.rescue.backend.repository.PostRepository;
 import app.rescue.backend.repository.UserRepository;
 import app.rescue.backend.service.PostService;
@@ -239,8 +240,16 @@ class PostControllerTest {
     }
 
     @Test
-    void willAttendEvent() throws Exception {
+    void canAttendEvent() throws Exception {
         // given
+        RegistrationDto registrationRequest = getRegistrationDto(postOwner.getEmail());
+        String userRole = Role.INDIVIDUAL.toString();
+
+        mvc.perform(post("/api/v1/auth/register/" + userRole)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("payload", objectMapper.writeValueAsString(registrationRequest)))
+                .andExpect(status().isOk());
+
         PostDto request = getPostDto();
         String postType = "event";
 
@@ -289,7 +298,7 @@ class PostControllerTest {
                 new TypeReference<>() {}
         );
 
-        assertEquals(actual.get(0).getEventAttendees(), "1");
+        assertEquals(actual.get(0).getEventAttendees().size(), 1);
     }
 
     @Test
@@ -338,5 +347,14 @@ class PostControllerTest {
         postRepository.save(post);
         return post;
     }
+    private RegistrationDto getRegistrationDto(String email) {
+        RegistrationDto registrationDto = new RegistrationDto();
+        registrationDto.setEmail(email);
+        registrationDto.setName("name");
+        registrationDto.setPassword("password");
+
+        return registrationDto;
+    }
+
 
 }

@@ -130,7 +130,11 @@ public class NotificationService {
                 newPostNotification.setUser(userService.getUserById(connection.getConnectedToId()));
                 newPostNotification.setSenderId(connection.getUser().getId());
                 newPostNotification.setPost(post);
-                newPostNotification.setText("There is a new post from your connections");
+
+                String postType = post.getPostType();
+                String notificationText = "There is a new " + postType.toUpperCase() + " post from your connections";
+
+                newPostNotification.setText(notificationText);
                 newPostNotification.setNotificationType("POST-CONNECTIONS");
 
                 notificationRepository.save(newPostNotification);
@@ -150,7 +154,11 @@ public class NotificationService {
                     newPostNotification.setUser(user);
                     newPostNotification.setSenderId(post.getUser().getId());
                     newPostNotification.setPost(post);
-                    newPostNotification.setText("There is a new post near you");
+
+                    String postType = post.getPostType();
+                    String notificationText = "There is a new " + postType.toUpperCase() + " post near you";
+
+                    newPostNotification.setText(notificationText);
                     newPostNotification.setNotificationType("POST-PROXIMITY");
 
                     notificationRepository.save(newPostNotification);

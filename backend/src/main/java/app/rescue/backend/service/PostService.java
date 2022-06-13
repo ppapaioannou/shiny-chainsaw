@@ -2,6 +2,7 @@ package app.rescue.backend.service;
 
 import app.rescue.backend.payload.PostDto;
 import app.rescue.backend.model.*;
+import app.rescue.backend.payload.UserDto;
 import app.rescue.backend.repository.AnimalCharacteristicsRepository;
 import app.rescue.backend.repository.EventPropertiesRepository;
 import app.rescue.backend.repository.PostRepository;
@@ -196,7 +197,8 @@ public class PostService {
         if (post.getEventProperties() != null) {
             String time = post.getEventProperties().getTime().toString();
             postResponse.setTime(time.substring(0,time.length()-3));
-            postResponse.setEventAttendees(String.valueOf(post.getEventProperties().getEventAttendees().size()));
+            List<UserDto> eventAttendees = post.getEventProperties().getEventAttendees().stream().map(userService::mapFromUserToResponse).collect(Collectors.toList());
+            postResponse.setEventAttendees(eventAttendees);
         }
         postResponse.setCreatedAt(post.getCreatedAt().format(timestampFormatter));
 

@@ -72,12 +72,10 @@ public class PostController {
     //TODO @PutMapping(path = "edit/{postId}") editPost(@PathVariable Long postId, Principal principal)
 
     @PutMapping(path = "event/{postId}/attend")
-    public ResponseEntity<String> willAttendEvent(@PathVariable Long postId, Principal principal) {
+    public ResponseEntity<String> attendEvent(@PathVariable Long postId, Principal principal) {
         postService.attendEvent(postId, principal.getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-    //TODO @PutMapping(path = "event/{postId}/not-attend") willNotAttendEvent(@PathVariable Long postId, Principal principal)
 
     @DeleteMapping(path = "delete/{postId}")
     public ResponseEntity<String> deletePost(@PathVariable Long postId, Principal principal) {

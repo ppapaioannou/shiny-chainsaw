@@ -176,20 +176,7 @@ public class UserService {
         return confirmationToken;
     }
 
-
-    //TODO DELETE THIS IF NO ERROR
-    //was used on Connection service deleteConnection()
-    //and UserService getSingleUser
-    //weird
-    /*
-    public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() ->
-                new IllegalStateException("User does not exits"));
-    }
-    */
-
-
-    private UserDto mapFromUserToResponse(User user) {
+    public UserDto mapFromUserToResponse(User user) {
         UserDto response = new UserDto();
         response.setId(user.getId());
         response.setName(user.getName());

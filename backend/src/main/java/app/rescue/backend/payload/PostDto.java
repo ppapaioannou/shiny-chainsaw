@@ -1,6 +1,10 @@
 package app.rescue.backend.payload;
 
+import app.rescue.backend.model.User;
 import lombok.Data;
+
+import java.util.Collection;
+import java.util.List;
 
 @Data
 public class PostDto {
@@ -35,6 +39,6 @@ public class PostDto {
 
     //event properties
     private String time;
-    private String eventAttendees;
+    private List<UserDto> eventAttendees;
     //private String address;
 }
