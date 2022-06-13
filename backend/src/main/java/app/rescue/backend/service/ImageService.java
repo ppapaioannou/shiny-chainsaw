@@ -36,8 +36,10 @@ public class ImageService {
 
         if (postImages.isPresent()) {
             List<Image> images = postImages.get();
-            //remove the first image, that's the thumbnail, for the carousel to work in the frontend
-            images.remove(0);
+            if (images.size() > 1) {
+                //remove the first image, that's the thumbnail, for the carousel to work in the frontend
+                images.remove(0);
+            }
             return images.stream().map(this::mapFromImageToResponse).collect(Collectors.toList());
         }
         else {

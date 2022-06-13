@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,6 +88,13 @@ public class NotificationService {
         User user = userService.getUserByEmail(username);
         List<Notification> notifications = notificationRepository.findAllByUserOrderByIdDesc(user);
         return notifications.stream().map(this::mapFromNotificationToResponse).collect(Collectors.toList());
+    }
+
+    public int getNumberOfUnreadNotifications(String username) {
+        User user = userService.getUserByEmail(username);
+        Optional<List<Notification>> notifications = notificationRepository.getUnreadNotification(user);
+        return notifications.map(List::size).orElse(0);
+
     }
 
     public void readNotification(Long notificationId, String username) {
@@ -171,9 +179,11 @@ public class NotificationService {
 
         NotificationDto notificationResponse = new NotificationDto();
         notificationResponse.setId(notification.getId());
-        notificationResponse.setSenderName(userService.getUserById(notification.getSenderId()).getName());
+        notificationResponse.setSender(userService.getUserById(notification.getSenderId()).getName());
         if (notification.getPost() != null) {
-            notificationResponse.setPost(notification.getPost().getTitle());
+            Post post = notification.getPost();
+            notificationResponse.setPost(post.getTitle());
+            notificationResponse.setPostId(post.getId());
         }
         notificationResponse.setText(notification.getText());
         notificationResponse.setCreatedAt(notification.getCreatedAt().format(dateTimeFormatter));

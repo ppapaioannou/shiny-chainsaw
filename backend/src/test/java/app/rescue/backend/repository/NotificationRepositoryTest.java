@@ -64,6 +64,21 @@ class NotificationRepositoryTest {
     }
 
     @Test
+    void getUnreadNotification() {
+        expected.get(0).setReadAt(LocalDateTime.now());
+        expected.remove(0);
+
+        Optional<List<Notification>> actual = underTest.getUnreadNotification(user);
+
+        assertThat(actual).isPresent();
+        assertThat(actual.get().size()).isEqualTo(expected.size());
+        
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).getId(), actual.get().get(i).getId());
+        }
+    }
+
+    @Test
     void notificationRead() {
         LocalDateTime expected = LocalDateTime.now();
         Notification notification = this.expected.get(0); //get a random notification for this test
@@ -100,5 +115,4 @@ class NotificationRepositoryTest {
         underTest.save(notification);
         expected.add(notification);
     }
-
 }

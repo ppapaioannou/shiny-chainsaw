@@ -24,6 +24,11 @@ public class NotificationController {
         return new ResponseEntity<>(notificationService.getAllNotifications(principal.getName()), HttpStatus.OK);
     }
 
+    @GetMapping(path = "unread")
+    public ResponseEntity<Integer> getNumberOfUnreadNotifications(Principal principal) {
+        return new ResponseEntity<>(notificationService.getNumberOfUnreadNotifications(principal.getName()), HttpStatus.OK);
+    }
+
     @PutMapping(path = "{notificationId}")
     public ResponseEntity<String> readNotification(@PathVariable Long notificationId, Principal principal) {
         notificationService.readNotification(notificationId, principal.getName());

@@ -263,6 +263,18 @@ class NotificationServiceTest {
     }
 
     @Test
+    void canGetNumberOfUnreadNotifications() {
+        // given
+        String username = "user@example.com";
+
+        // when
+        underTest.getNumberOfUnreadNotifications(username);
+
+        // then
+        verify(notificationRepository).getUnreadNotification(any());
+    }
+
+    @Test
     void canReadNotification() {
         // given
         Long notificationId = 1L;

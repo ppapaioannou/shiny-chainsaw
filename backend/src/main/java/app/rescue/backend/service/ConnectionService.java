@@ -4,7 +4,6 @@ import app.rescue.backend.model.*;
 import app.rescue.backend.payload.ConnectionDto;
 import app.rescue.backend.repository.ConnectionRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -100,7 +99,7 @@ public class ConnectionService {
 
     public void invitationRegistration(User newUser, User invitedByUser) {
         if (newUser.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.INDIVIDUAL) {
-            connectionRepository.save(new Connection(newUser, invitedByUser.getId(), "ACCOUNT-DISABLED"));
+            connectionRepository.save(new Connection(newUser, invitedByUser.getId(), "REF-ACCOUNT-DISABLED"));
             connectionRepository.save(new Connection(invitedByUser, newUser.getId(), "REF-PENDING"));
         }
         else if (newUser.getUserRole() == Role.INDIVIDUAL && invitedByUser.getUserRole() == Role.ORGANIZATION) {

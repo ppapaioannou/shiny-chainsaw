@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -95,9 +96,42 @@ class NotificationControllerTest {
 
         for (int i = 0; i < expected.size(); i++) {
             assertEquals(expected.get(expected.size() -1 -i).getId(), actual.get(i).getId());
-            assertEquals(sender.getName(), actual.get(i).getSenderName());
+            assertEquals(sender.getName(), actual.get(i).getSender());
             assertEquals(expected.get(expected.size() -1 -i).getText(), actual.get(i).getText());
         }
+    }
+
+    @Test
+    void getNumberOfUnreadNotifications() throws Exception {
+        // given
+        List<Notification> expected = new ArrayList<>();
+        expected.add(createNotification(user, "1", sender));
+        expected.add(createNotification(user, "2", sender));
+        expected.add(createNotification(user, "3", sender));
+
+        mvc.perform(put("/api/v1/notifications/" + expected.get(0).getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(mockPrincipal))
+                .andExpect(status().isOk());
+
+        // when
+        MvcResult getNotificationsResult = mvc.perform(get("/api/v1/notifications/unread")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(mockPrincipal))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // then
+        String contentAsString = getNotificationsResult
+                .getResponse()
+                .getContentAsString();
+
+        Integer actual = objectMapper.readValue(
+                contentAsString,
+                new TypeReference<>() {}
+        );
+
+        assertThat(actual).isEqualTo(expected.size()-1);
     }
 
     @Test
@@ -159,5 +193,4 @@ class NotificationControllerTest {
         notificationRepository.save(notification);
         return notification;
     }
-
 }

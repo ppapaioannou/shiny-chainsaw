@@ -163,7 +163,7 @@ class ConnectionControllerTest {
 
 
         List<NotificationDto> notifications = notificationService.getAllNotifications(otherIndividual.getEmail());
-        assertThat(notifications.get(0).getSenderName()).isEqualTo(individual.getName());
+        assertThat(notifications.get(0).getSender()).isEqualTo(individual.getName());
         assertThat(notifications.get(0).getText()).contains("New Friend Request");
     }
 
