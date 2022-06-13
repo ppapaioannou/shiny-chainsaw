@@ -141,9 +141,11 @@ public class PostService {
         animalCharacteristics.setSize(postDto.getSize());
         animalCharacteristics.setMicrochipNumber(postDto.getMicrochipNumber());
         animalCharacteristics.setAge(postDto.getAge());
-        animalCharacteristics.setNeutered(postDto.getNeutered());
-        animalCharacteristics.setGoodWithAnimals(postDto.getGoodWithAnimals());
-        animalCharacteristics.setGoodWithChildren(postDto.getGoodWithChildren());
+        if (post.getPostType().equals("adoption")) {
+            animalCharacteristics.setNeutered(turnStringToBoolean(postDto.getNeutered()));
+            animalCharacteristics.setGoodWithAnimals(turnStringToBoolean(postDto.getGoodWithAnimals()));
+            animalCharacteristics.setGoodWithChildren(turnStringToBoolean(postDto.getGoodWithChildren()));
+        }
         animalCharacteristics.setActionsTaken(postDto.getActionTaken());
         animalCharacteristicsRepository.save(animalCharacteristics);
         return animalCharacteristics;
@@ -184,9 +186,11 @@ public class PostService {
             postResponse.setColors(post.getAnimalCharacteristics().getColor().split(","));
             postResponse.setAge(post.getAnimalCharacteristics().getAge());
             postResponse.setMicrochipNumber(post.getAnimalCharacteristics().getMicrochipNumber());
-            postResponse.setNeutered(post.getAnimalCharacteristics().getNeutered());
-            postResponse.setGoodWithAnimals(post.getAnimalCharacteristics().getGoodWithAnimals());
-            postResponse.setGoodWithChildren(post.getAnimalCharacteristics().getGoodWithChildren());
+            if (post.getPostType().equals("adoption")) {
+                postResponse.setNeutered(turnBooleanToString(post.getAnimalCharacteristics().getNeutered()));
+                postResponse.setGoodWithAnimals(turnBooleanToString(post.getAnimalCharacteristics().getGoodWithAnimals()));
+                postResponse.setGoodWithChildren(turnBooleanToString(post.getAnimalCharacteristics().getGoodWithChildren()));
+            }
             postResponse.setActionTaken(post.getAnimalCharacteristics().getActionsTaken());
         }
         if (post.getEventProperties() != null) {
@@ -217,6 +221,19 @@ public class PostService {
             }
         }
         return postResponse;
+    }
+
+    private String turnBooleanToString(Boolean bool) {
+        if (bool) {
+            return "Yes";
+        }
+        else {
+            return "No";
+        }
+    }
+
+    private Boolean turnStringToBoolean(String s) {
+        return s.equals("Yes");
     }
 
 }

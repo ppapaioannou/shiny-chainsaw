@@ -28,9 +28,9 @@ public class PostDto {
     private String[] colors;
     private String age;
     private String microchipNumber;
-    private Boolean neutered;
-    private Boolean goodWithAnimals;
-    private Boolean goodWithChildren;
+    private String neutered;
+    private String goodWithAnimals;
+    private String goodWithChildren;
     private String actionTaken;
 
     //event properties
