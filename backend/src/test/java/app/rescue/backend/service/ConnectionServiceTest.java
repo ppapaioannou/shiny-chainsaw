@@ -253,46 +253,23 @@ class ConnectionServiceTest {
     }
 
     @Test
-    void isConnectedTo() {
+    void canGetConnectionStatus() {
         // given
         Long connectedToId = 1L;
         String username = "user@example.com";
 
         User user = mock(User.class);
-        User connectedToUser = mock(User.class);
         Connection connection = mock(Connection.class);
 
         given(userService.getUserByEmail(username)).willReturn(user);
-        given(connectedToUser.getId()).willReturn(connectedToId);
-        given(userService.getUserById(connectedToId)).willReturn(connectedToUser);
         given(connectionRepository.findConnectionByUserAndConnectedToId(user, connectedToId)).willReturn(Optional.of(connection));
+        given(connection.getConnectionStatus()).willReturn("status");
 
         // when
-        boolean actual = underTest.isConnectedTo(connectedToId, username);
+        String actual = underTest.getConnectionStatus(connectedToId, username);
 
         // then
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    void isNotConnectedTo() {
-        // given
-        Long connectedToId = 1L;
-        String username = "user@example.com";
-
-        User user = mock(User.class);
-        User connectedToUser = mock(User.class);
-
-        given(userService.getUserByEmail(username)).willReturn(user);
-        given(connectedToUser.getId()).willReturn(connectedToId);
-        given(userService.getUserById(connectedToId)).willReturn(connectedToUser);
-        given(connectionRepository.findConnectionByUserAndConnectedToId(user, connectedToId)).willReturn(Optional.empty());
-
-        // when
-        boolean actual = underTest.isConnectedTo(connectedToId, username);
-
-        // then
-        assertThat(actual).isFalse();
+        assertThat(actual).isEqualTo("status");
     }
 
     @Test

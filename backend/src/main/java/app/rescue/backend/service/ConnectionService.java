@@ -66,9 +66,22 @@ public class ConnectionService {
         return connections.stream().map(connection -> mapFromConnectionToResponse(connection, getConnectedToUser)).collect(Collectors.toList());
     }
 
-    public Boolean isConnectedTo(Long connectedToId, String username) {
+    public String getConnectionStatus(Long connectedToId, String username) {
         User user = userService.getUserByEmail(username);
-        return alreadyConnected(user, userService.getUserById(connectedToId));
+        Optional<Connection> connection1 = connectionRepository.findConnectionByUserAndConnectedToId(user, connectedToId);
+        if (connection1.isPresent()) {
+            return connection1.get().getConnectionStatus();
+        }
+        else {
+            User connectedToUser = userService.getUserById(connectedToId);
+            Optional<Connection> connection2 = connectionRepository.findConnectionByUserAndConnectedToId(connectedToUser, user.getId());
+            if (connection2.isPresent()) {
+                return "CONNECTION REQUEST";
+            }
+            else {
+                return "NOT CONNECTED";
+            }
+        }
     }
 
     public Connection acceptConnection(Long userId, String username) {

@@ -300,12 +300,12 @@ class ConnectionControllerTest {
     }
 
     @Test
-    void isConnectedTo() throws Exception {
+    void canGetConnectionStatus() throws Exception {
         //given
         getConnection(individual, otherIndividual, "CONNECTED");
 
         //when
-        MvcResult getConnectionsResult = mvc.perform(get("/api/v1/connection/is-connected-to/" + otherIndividual.getId())
+        MvcResult getConnectionsResult = mvc.perform(get("/api/v1/connection/status/" + otherIndividual.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .principal(individualMockPrincipal))
                 .andExpect(status().isOk())
@@ -316,35 +316,7 @@ class ConnectionControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        Boolean actual = objectMapper.readValue(
-                contentAsString,
-                new TypeReference<>() {}
-        );
-
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    void isNotConnectedTo() throws Exception {
-        //given
-        //when
-        MvcResult getConnectionsResult = mvc.perform(get("/api/v1/connection/is-connected-to/" + otherIndividual.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(individualMockPrincipal))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        // then
-        String contentAsString = getConnectionsResult
-                .getResponse()
-                .getContentAsString();
-
-        Boolean actual = objectMapper.readValue(
-                contentAsString,
-                new TypeReference<>() {}
-        );
-
-        assertThat(actual).isFalse();
+        assertThat(contentAsString).isEqualTo("CONNECTED");
     }
 
     @Test

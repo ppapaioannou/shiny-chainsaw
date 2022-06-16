@@ -35,9 +35,9 @@ public class ConnectionController {
         return new ResponseEntity<>(connectionService.getAllConnections(connectionType, principal.getName()), HttpStatus.OK);
     }
 
-    @GetMapping(path="is-connected-to/{connectedToId}")
-    public ResponseEntity<Boolean> isConnectedTo(@PathVariable Long connectedToId, Principal principal) {
-        return new ResponseEntity<>(connectionService.isConnectedTo(connectedToId, principal.getName()), HttpStatus.OK);
+    @GetMapping(path="status/{connectedToId}")
+    public ResponseEntity<String> getConnectionStatus(@PathVariable Long connectedToId, Principal principal) {
+        return new ResponseEntity<>(connectionService.getConnectionStatus(connectedToId, principal.getName()), HttpStatus.OK);
     }
 
     @PutMapping(path="accept/{userId}")
