@@ -138,10 +138,7 @@ public class UserService {
 
     //TODO public void changePassword(String username)
 
-    public void deleteAccount(String username) {
-        User user = getUserByEmail(username);
-        userRepository.delete(user);
-    }
+    //TODO public void deleteAccount(String username)
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->

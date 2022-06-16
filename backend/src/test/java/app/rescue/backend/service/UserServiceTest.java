@@ -264,20 +264,6 @@ class UserServiceTest {
         verify(userRepository).save(any());
     }
 
-
-    @Test
-    void canDeleteAccount() {
-        // given
-        User user = mock(User.class);
-        given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
-
-        // when
-        underTest.deleteAccount(user.getEmail());
-
-        // then
-        verify(userRepository).delete(any());
-    }
-
     @Test
     void canGetUserByEmail() {
         // given

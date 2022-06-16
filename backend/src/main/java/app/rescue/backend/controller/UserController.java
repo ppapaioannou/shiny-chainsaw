@@ -69,12 +69,8 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //TODO @PutMapping(path = "change-password") changePassword(@RequestBody Principal principal)
+    //TODO @PutMapping(path = "change-password") changePassword(Principal principal)
 
-    @DeleteMapping(path = "delete")
-    public ResponseEntity<String> deleteAccount(Principal principal) {
-        userService.deleteAccount(principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    //TODO @DeleteMapping(path = "delete") deleteAccount(Principal principal)
 
 }

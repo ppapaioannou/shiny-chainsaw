@@ -190,21 +190,6 @@ class UserControllerTest {
         assertEquals(request.getName(), updatedUser.getName());
     }
 
-    @Test
-    void canDeleteAccount() throws Exception {
-        // given
-        assertThat(userRepository.existsById(user.getId())).isTrue();
-
-        // when
-        mvc.perform(delete("/api/v1/users/delete/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(mockPrincipal))
-                .andExpect(status().isOk());
-
-        //then
-        assertThat(userRepository.existsById(user.getId())).isFalse();
-    }
-
     private RegistrationDto getRegistrationDto(String email) {
         RegistrationDto registrationDto = new RegistrationDto();
         registrationDto.setEmail(email);
