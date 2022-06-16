@@ -48,16 +48,7 @@ public class CommentService {
 
     //TODO public void editComment()
 
-    public void deleteComment(Long commentId, String username) {
-        Comment comment = findById(commentId);
-        String commentOwner = comment.getUser().getEmail();
-        if (commentOwner.equals(username)){
-            commentRepository.delete(comment);
-        }
-        else {
-            throw new IllegalStateException("You don't have permission to delete this comment");
-        }
-    }
+    //TODO public void deleteComment()
 
     public Comment findById(Long id) {
         return commentRepository.findById(id).orElseThrow(() ->

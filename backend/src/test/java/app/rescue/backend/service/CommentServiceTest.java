@@ -113,43 +113,6 @@ class CommentServiceTest {
     }
 
     @Test
-    void canDeleteComment() {
-        // given
-        Long commentId = 1L;
-        String username = "username";
-
-        Comment comment = mock(Comment.class);
-        User user = mock(User.class);
-        given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));
-        given(comment.getUser()).willReturn(user);
-        given(user.getEmail()).willReturn(username);
-
-        // when
-        underTest.deleteComment(commentId, username);
-        // then
-        verify(commentRepository).delete(comment);
-    }
-
-    @Test
-    void deleteCommentWillThrowWhenNotCommentOwner() {
-        // given
-        Long commentId = 1L;
-        String username = "username";
-
-        Comment comment = mock(Comment.class);
-        User user = mock(User.class);
-        given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));
-        given(comment.getUser()).willReturn(user);
-        given(user.getEmail()).willReturn("original-owner");
-
-        // when
-        // then
-        assertThatThrownBy(() -> underTest.deleteComment(commentId, username))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("You don't have permission to delete this comment");
-    }
-
-    @Test
     void canFindById() {
         // given
         Comment comment = mock(Comment.class);

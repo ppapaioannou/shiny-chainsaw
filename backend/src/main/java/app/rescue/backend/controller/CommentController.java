@@ -35,11 +35,7 @@ public class CommentController {
         return new ResponseEntity<>(commentService.getAllPostComments(postId), HttpStatus.OK);
     }
 
-    //TODO @PutMapping(path = "edit/{commentId}") editComment(@PathVariable Long commentId, Principal principal)
+    //TODO @PutMapping(path = "{commentId}/edit") editComment(@PathVariable Long commentId, Principal principal)
 
-    @DeleteMapping(path = "{commentId}/delete")
-    public ResponseEntity<String> deleteComment(@PathVariable Long commentId, Principal principal) {
-        commentService.deleteComment(commentId, principal.getName());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    //TODO @DeleteMapping(path = "{commentId}/delete") deleteComment(@PathVariable Long commentId, Principal principal)
 }

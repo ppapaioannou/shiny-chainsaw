@@ -138,23 +138,6 @@ class CommentControllerTest {
         }
     }
 
-    @Test
-    void canDeleteComment() throws Exception {
-        // given
-        Long commentId = addComment(commentator, post).getId();
-
-        assertThat(commentRepository.existsById(commentId)).isTrue();
-
-        // when
-        mvc.perform(delete("/api/v1/comment/"+commentId+"/delete")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(mockPrincipal))
-                .andExpect(status().isOk());
-
-        // then
-        assertThat(commentRepository.existsById(commentId)).isFalse();
-    }
-
     private CommentDto getCommentDto(Long postId, User user) {
         CommentDto commentDto = new CommentDto();
         commentDto.setPostId(postId);
