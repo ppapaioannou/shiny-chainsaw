@@ -8,7 +8,6 @@ import app.rescue.backend.payload.RegistrationDto;
 import app.rescue.backend.repository.PostRepository;
 import app.rescue.backend.repository.UserRepository;
 import app.rescue.backend.service.PostService;
-import app.rescue.backend.utility.AppConstants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -89,8 +87,7 @@ class PostControllerTest {
 
         // then
         Specification<Post> specs = Specification.where(null);
-        Pageable pageable = AppConstants.createPageableRequest(0, 10, "id", "desc");
-        List<PostDto> posts = postService.getAllPosts(specs, pageable, postOwner.getEmail());
+        List<PostDto> posts = postService.getAllPosts(specs, postOwner.getEmail());
 
         assertEquals(request.getTitle(), posts.get(0).getTitle());
         assertEquals(request.getBody(), posts.get(0).getBody());
@@ -112,8 +109,7 @@ class PostControllerTest {
 
         // then
         Specification<Post> specs = Specification.where(null);
-        Pageable pageable = AppConstants.createPageableRequest(0, 10, "id", "desc");
-        List<PostDto> posts = postService.getAllPosts(specs, pageable, postOwner.getEmail());
+        List<PostDto> posts = postService.getAllPosts(specs, postOwner.getEmail());
 
         assertEquals(request.getTitle(), posts.get(0).getTitle());
         assertEquals(request.getBody(), posts.get(0).getBody());

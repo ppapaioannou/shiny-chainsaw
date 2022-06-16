@@ -8,8 +8,7 @@ import app.rescue.backend.repository.OrganizationInformationRepository;
 import app.rescue.backend.repository.UserRepository;
 import app.rescue.backend.utility.EmailSender;
 import app.rescue.backend.utility.EmailValidator;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -93,8 +92,9 @@ public class UserService {
         emailSender.send(email, name, confirmationLink);
     }
 
-    public List<UserDto> getAllUsers(Specification<User> specs, Pageable pageable) {
-        Page<User> users = userRepository.findAll(specs, pageable);
+    public List<UserDto> getAllUsers(Specification<User> specs) {
+        Sort sort = Sort.by("id").descending();
+        List<User> users = userRepository.findAll(specs, sort);
         return users.stream().map(this::mapFromUserToResponse).collect(Collectors.toList());
     }
 

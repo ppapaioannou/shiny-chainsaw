@@ -1,15 +1,11 @@
 package app.rescue.backend.service;
 
-import app.rescue.backend.model.IndividualInformation;
-import app.rescue.backend.model.OrganizationInformation;
-import app.rescue.backend.model.Role;
-import app.rescue.backend.model.User;
+import app.rescue.backend.model.*;
 import app.rescue.backend.payload.LocationDto;
 import app.rescue.backend.payload.UserDto;
 import app.rescue.backend.repository.IndividualInformationRepository;
 import app.rescue.backend.repository.OrganizationInformationRepository;
 import app.rescue.backend.repository.UserRepository;
-import app.rescue.backend.utility.AppConstants;
 import app.rescue.backend.utility.EmailSender;
 import app.rescue.backend.utility.EmailValidator;
 import org.junit.jupiter.api.AfterEach;
@@ -19,12 +15,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.mail.MessagingException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -187,15 +183,15 @@ class UserServiceTest {
     void canGetAllUsers() {
         // given
         Specification<User> specs = Specification.where(null);
-        Pageable pageable = AppConstants.createPageableRequest(0, 10, "id", "desc");
+        Sort sort = Sort.by("id").descending();
 
         //Suppress the unchecked warning for mock classes with generic parameters
-        Page<User> pagedUsers = mock(Page.class);
-        given(userRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(pagedUsers);
+        List<User> users = mock(List.class);
+        given(userRepository.findAll(any(Specification.class), any(Sort.class))).willReturn(users);
         // when
-        underTest.getAllUsers(specs, pageable);
+        underTest.getAllUsers(specs);
         // then
-        verify(userRepository).findAll(specs, pageable);
+        verify(userRepository).findAll(specs, sort);
     }
 
     @Test

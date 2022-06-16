@@ -7,7 +7,6 @@ import app.rescue.backend.payload.PostDto;
 import app.rescue.backend.repository.AnimalCharacteristicsRepository;
 import app.rescue.backend.repository.EventPropertiesRepository;
 import app.rescue.backend.repository.PostRepository;
-import app.rescue.backend.utility.AppConstants;
 import com.vividsolutions.jts.geom.Geometry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +15,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -118,16 +117,16 @@ class PostServiceTest {
     void canGetAllPosts() {
         // given
         Specification<Post> specs = Specification.where(null);
-        Pageable pageable = AppConstants.createPageableRequest(0, 10, "id", "desc");
+        Sort sort = Sort.by("id").descending();
         String username = "username";
 
         //Suppress the unchecked warning for mock classes with generic parameters
-        Page<Post> pagedPosts = mock(Page.class);
-        given(postRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(pagedPosts);
+        List<Post> posts = mock(List.class);
+        given(postRepository.findAll(any(Specification.class), any(Sort.class))).willReturn(posts);
         // when
-        underTest.getAllPosts(specs, pageable, username);
+        underTest.getAllPosts(specs, username);
         // then
-        verify(postRepository).findAll(specs, pageable);
+        verify(postRepository).findAll(specs, sort);
     }
 
     @Test

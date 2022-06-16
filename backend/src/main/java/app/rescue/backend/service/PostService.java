@@ -7,8 +7,7 @@ import app.rescue.backend.repository.AnimalCharacteristicsRepository;
 import app.rescue.backend.repository.EventPropertiesRepository;
 import app.rescue.backend.repository.PostRepository;
 import com.vividsolutions.jts.geom.Geometry;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -62,8 +61,10 @@ public class PostService {
         return post;
     }
 
-    public List<PostDto> getAllPosts(Specification<Post> specs, Pageable pageable, String username) {
-        Page<Post> posts = postRepository.findAll(specs, pageable);
+    public List<PostDto> getAllPosts(Specification<Post> specs, String username) {
+        Sort sort = Sort.by("id").descending();
+        List<Post> posts = postRepository.findAll(specs, sort);
+
         return posts.stream().map(post -> mapFromPostToResponse(post, username)).collect(Collectors.toList());
     }
 
