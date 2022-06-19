@@ -36,8 +36,9 @@ public class UserController {
     }
 
     @GetMapping(path = "all")
-    public ResponseEntity<List<UserDto>> getAllUsers(@SearchSpec Specification<User> specs) {
-        return new ResponseEntity<>(userService.getAllUsers(Specification.where(specs)), HttpStatus.OK);
+    public ResponseEntity<List<UserDto>> getAllUsers(@SearchSpec Specification<User> specs,
+                                                     @RequestParam(value = "preview", required = false) boolean preview) {
+        return new ResponseEntity<>(userService.getAllUsers(Specification.where(specs), preview), HttpStatus.OK);
     }
 
     @GetMapping(path = "{userId}")

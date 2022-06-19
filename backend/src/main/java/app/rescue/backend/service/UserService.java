@@ -8,6 +8,10 @@ import app.rescue.backend.repository.OrganizationInformationRepository;
 import app.rescue.backend.repository.UserRepository;
 import app.rescue.backend.utility.EmailSender;
 import app.rescue.backend.utility.EmailValidator;
+import org.hibernate.query.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -92,10 +96,18 @@ public class UserService {
         emailSender.send(email, name, confirmationLink);
     }
 
-    public List<UserDto> getAllUsers(Specification<User> specs) {
+    public List<UserDto> getAllUsers(Specification<User> specs, boolean preview) {
         Sort sort = Sort.by("id").descending();
-        List<User> users = userRepository.findAll(specs, sort);
-        return users.stream().map(this::mapFromUserToResponse).collect(Collectors.toList());
+        if (preview) {
+            // page for previewing users, page 0 of size 3 to view the 3 first users
+            Pageable pageable = PageRequest.of(0, 3, sort);
+            Page<User> users = userRepository.findAll(specs, pageable);
+            return users.stream().map(this::mapFromUserToResponse).collect(Collectors.toList());
+        }
+        else {
+            List<User> users = userRepository.findAll(specs, sort);
+            return users.stream().map(this::mapFromUserToResponse).collect(Collectors.toList());
+        }
     }
 
     public UserDto getSingleUser(Long userId) {

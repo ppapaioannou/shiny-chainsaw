@@ -189,7 +189,7 @@ class UserServiceTest {
         List<User> users = mock(List.class);
         given(userRepository.findAll(any(Specification.class), any(Sort.class))).willReturn(users);
         // when
-        underTest.getAllUsers(specs);
+        underTest.getAllUsers(specs, false);
         // then
         verify(userRepository).findAll(specs, sort);
     }
