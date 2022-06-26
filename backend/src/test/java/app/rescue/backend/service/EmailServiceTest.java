@@ -51,7 +51,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void canSendInvitationEmailEmail() throws MessagingException {
+    void canSendInvitationEmail() throws MessagingException {
         String recipient = "example@example.com";
         String name = "name";
         String confirmationLink = "ref-link";
