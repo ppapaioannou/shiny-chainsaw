@@ -20,11 +20,6 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
     List<Connection> getAllByUserAndConnectionStatus(User user, String connectionStatus);
 
-
-
-
-
-
     @Query("SELECT c FROM Connection c WHERE c.user = ?1 AND c.connectedToId = ?2 AND c.connectionStatus = 'PENDING'")
     Optional<Connection> findPendingConnection(User user, Long connectedToId);
 

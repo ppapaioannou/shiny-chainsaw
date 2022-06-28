@@ -8,7 +8,6 @@ import app.rescue.backend.repository.OrganizationInformationRepository;
 import app.rescue.backend.repository.UserRepository;
 import app.rescue.backend.utility.EmailSender;
 import app.rescue.backend.utility.EmailValidator;
-import org.hibernate.query.Query;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
